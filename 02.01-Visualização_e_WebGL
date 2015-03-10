@@ -1,0 +1,295 @@
+Visualização e WebGL
+=====================
+
+* Qualquer desenho que realizarmos, no final, aproximações feitas com
+  triângulos - poliedros.
+* Produções profissionais têm número de triângulos quase do tamanho de
+  pixels. Se elevarmos no número de triângulos ao infinito, teremos uma
+  forma contínua.
+* Chamamos de 'malha de triângulos' o conjunto de triângulos que
+  determinam a figura. Adicionamos, a esta malha, informações
+  adicionais, que representam mais informações. Esses dados podem estar
+  associados a cada face ou a cada vértice.
+
+* Para construir uma figura, precisamos determinar a posição de seus 
+  vértices e a conectividade entre pares de vértices.
+* De forma geral, precisamos de mais triângulos para regiões com
+  curvaturas, e menos com o restante.
+
+
+* Pipeline moderno do OpenGL
+                               GPU Data Flow
+    Application =========================================> Framebuffer
+
+        Vertices       Vertices        Fragments         Pixels
+           .------------.   .------------.   .------------.
+           |   Vertex   |-->| Rasterizer |-->|  Fragment  |--> Imagem
+           | Processing |   |            |   | Processing |
+           '------------'   '------------'   '------------'
+                 ^                                 ^
+                 |                                 |
+           .------------.                    .------------.
+           |   Vertex   |                    |  Fragment  | 
+           |   Shader   |                    |   Shader   |
+           '------------'                    '------------'
+
+* Aplicações do 'vertex shader'
+    - Movimentação de vértices
+        - Movimento não linear (ex: ondulatória)
+    - Deformações
+        - Morphing
+        - Geração de fractais
+    - Iluminação
+        - Criação de modelos mais realísitcos
+        - Shaders para desenhos animados
+
+* Aplicações do 'fragment shader'
+    - Cálculos de iluminação por fragmento
+    - Mapeamento de texturas
+
+* Implementação de shaders
+    - Os primeiros shaders programáveis eram implementados usando
+      lnguagem parecida com assembly
+    - Extensões do OpenGL adicionaram funções para acesso aos shaders de
+      vértice e fragmento.
+    - Cg (C for graphics): linguagem tipo "C para programação de
+      shaders"
+        - Funciona com OpenGL e DirectX
+
+* GLSL
+    - OpenGL Shading Language
+    - Faz parte do OpenGL >= 2.0
+    - Linguagem de alto nível parecida com o "C"
+    - Novos tipos de dados
+        - Vetores
+        - Matrizes
+        - "Samplers" (texturas)
+    - A partir do OpenGL 3.1, uma aplicação deve prover shaders
+
+* Um 'vertex shader' simples
+
+    /* Input from application */
+    attribute vec4 vPosition; /* must link to var in application */
+    voi main(void)
+    {
+        gl_Position = vPosition;
+    }   /* ^ bult in variable */
+
+* Modelo de execução
+
+    Vertex data
+      Shader
+         .-------------> GPU
+         |                |
+         |                |
+         |                '
+    Appplication  ----> Vertex ------> Primitive
+      Program           Shader         Assembly
+              gl.drawArrays   Vertex
+
+* Um 'fragment shader' simples
+    
+    precision mediump float; /* precisão para ponto flutuante */
+    void main(void)
+    {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0)
+    }
+
+* Modelo de execução
+
+                      Application
+                           |
+                           |
+                           '
+      Rasterizer ----> Fragment ----> Frame
+                        Shader        Buffer
+
+* Tipos de dados
+    - Tipos básicos: float, int, bool
+    - Vetores
+        - vec2, vec3, vec4
+        - ivec2, ivec3, ivec4
+        - bvec2, bvec3, bvec4
+    - Matrizes (armazenadas coluna a coluna)
+        - mat2, mat3, mat4
+
+* Valores passados por valor
+    - Ausência de ponteiros em GLSL
+    - Pode-se usar struct que podem ser devolvidas no retorno de funções
+    - Já que matrizes e vetores são tipos básicos, eles podem ser
+      passados por valor
+
+* Qualificadores
+    - GLSL utiliza muito dos qualidifacores do C/C++/Java (ex: const)
+    - Outros sã onecessários devido ao modelo de execução
+    - Variáveis podem ter valores que mudam
+        - Uma vez por vértice
+        - Uma vez por primitiva
+        - Uma vez por fragmento
+        - A qualquer tempo dentro da aplicação
+    - Atributos de vértice são interpolados pelo rasterizador em
+      atributos de fragmento.
+
+    - Ex:
+
+              C (B)
+          : : :\: : 
+         ¨:¨:/: :¨:¨¨ } Quando o rasterizer dividir em fragmentos,
+         ¨:¨:¨:¨:\:¨¨ } as cores serão definidas pelos vértices. Se
+         ¨:/:¨:¨:¨:¨¨ } as cores de cada vértice for diferente, os
+         ¨:¨:¨:¨:¨:\¨ } fragmentos terão cores que variam de um para
+         /:_:_:_:_:_\ } outro (criado pela interpolação)
+       A  : : : : :   B
+      (R)            (G)
+
+* Qualificador attribute
+    - Qualificador que indica que valores podem mudar no máximo uma vez
+      por vértices
+    - Existem algumas variáveis especiais como 'gl_Position'
+    - Definidas pelo usuário
+        - attribute float temperature
+        - attribute vec3 velocity
+    - Versões recentes do GLSL utilizam qualidicadires in e out para
+      enviar e retornar dados dos shaders.
+
+               ^           
+               |           
+               |           
+               | C   . Se criarmos um vetor representando      
+              /\    /  alguma informação, teremos que um
+             /^ \  /   fragmento terá a interpolação dos
+            / |  \/    vetores sobre cada figura.
+        ^  /  |  /\        
+        | /   * /  \ ^     
+        |/__________\|     
+       A                   
+      (R)            (G)   
+
+* Qualificador 'uniform'
+    - Serve como atributo a ser aplicado globalmente a TODOS os
+      fragmentos
+
+* Qualidicador 'varying'
+    - Variáveis que são PASSADAS DO VERTEX SHADER PARA O FRAGMENT
+      SHADER.
+    - Automaticamente interpoladas pelo rasterizador
+    - Versões mais recentes do WebGL utilizam 'out' no vertex shader e
+      'in' no fragment shader.
+      - out vec4 color // vertex shader
+      - in  vec4 color // fragment shader
+   - Difere do 'uniform', que é global (e não precisa ser repassado)
+   - 'attribute' define um atributo para cada vértice, e por meio
+     do 'varying' conseguimos transmitir as características para
+     o fragment shader. O 'rasterizer' fará a interpolação.
+     
+* Exemplo de 'vertex shader'
+
+    | attribute vec4 vPosition;
+    | attribute vec4 vColor;
+    | avarying vec4 fColor;
+    | void main()
+    | {
+    |     gl_Position = vPosition;
+    |     fColor = vColor;
+    | }
+
+* 'Fragment shader' correspondente
+
+    | precision mediump float;
+    | 
+    | varying vec4 fColor;
+    | void main()
+    | {
+    |     gl_FragColor = fColor;
+    | }
+
+* Enviando atributos
+
+    var cBuffer = gl.reateBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatter(colors),
+                  gl.STATIC_DRAW);
+    // static draw diz que não faremos transformações de dados.
+    // Isso otimiza dizendo que não precisamos fazer transferência
+    // de dados da memória para a GPU
+
+    var vColor = gl.getAttribLocation(program, "vColor");
+    gl.vertexAttribPointer(vColor, 3, gl.FLOAT, false, 0, 0);
+    fl.enableVertexAttribArray(vColor);
+    
+* Enviando uma variável 'uniform'
+
+    // in application
+        
+    /* juntando 'color' da aplicação com 'color' do fragment shader
+    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
+    colorLoc = gl.getSetUniformLocation(program, "color");
+    gl.uniform4v(colorLoc, color);
+    
+    // in fragment shader
+    
+    uniform vec4 color;
+    void main()
+    {
+        gl_FragColor = color;
+    }
+
+* Operadores e funções
+    - Funções matemáticas
+        - Trigonométricas: sin(), cos(), asin(), tan(), etc
+        - Aritméticas: sqrt(), power(), abs()
+        - Gráficas: reflect(), length()
+    - Sobrecarga de operadores
+        - mat4 a;
+        - vec4 b, c, d
+        - c = b*a // vetor coluna de 4 linhas
+        - d = a*b // vetor linha de 4 colunas
+
+* Swizzling
+    - Elentos de arrays podem ser referenciados usando [] ou operador de
+      seleção (.) com:
+      - x, y, z, w
+      - r, g, b, a
+      - s, t, p, q
+      - a[2], a.b, a.z e a.p denotam o mesmo elemento.
+    
+    - O operador de swizzling nos permite manipular elementos:
+        - vec4 a, b
+        - a.yz = vec2(1.0, 2.0); // instanciando
+        - b = a.yxzw;
+        - a.xy = b.yx; // reordenando elementos
+
+* Primitivas em WebGL
+    - GL_POINTS         (pontos)
+    - GL_LINES          (linhas individuais)
+    - GL_LINE_STRIP     (várias linhas conectadas)
+    - GL_LINE_LOOP      (várias linhas conectadas em circuíto)
+    - GL_TRIANGLES      (triângulos distintos)
+    - LG_TRIANGLE_STRIP (vários vértices em vários triângulos)
+    - GL_TRIANGLE_FAN   (1 vértice em vários triângulos)
+
+* Polígonos
+    - OpenGL/WebGL só desenha triângulos. Eles devem ser:
+        - Simples: arestas não se cruzam
+        - Convexos: todos os pontos de um segmento de reta entre dois
+          pontos dentro do polígono também estão dentro do polígono
+        - Planares: todos os vértices estão no mesmo plano
+    - A aplicação deve converter um polígono em triângulos
+        - OpenGL >= 4.1 disponibiliza um shader para tal tarefa
+        
+                  /|                               
+                 / |              /\              :\
+                /  |             /  \    -->     /: \
+               /   |            /    \          / :  \
+               \   |           /  ____\        /  :___\
+                \  |          / .´            / .´
+                 \ |         /.´             /.´
+                  \|        /´              /´
+
+             Triângulo         Triângulo não convexo
+              correto          (precisa ser dividido)
+
+* Bons triângulos
+    - Em geral, queremos fazer triângulos mais próximos de triângulos
+      equiláteros. Triângulso "finos" prejudicarão o vetor que
+      determina a cor.

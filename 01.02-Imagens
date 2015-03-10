@@ -1,0 +1,121 @@
+Imagens
+========
+
+* Formação da imagem
+    - Usa um processo análogo aos formados por sistemas de imagens
+      físicos (ex: câmeras, microscópios, sistema visual humano)
+
+* Luz
+    - A luz é parte do espectro eletromagnético que é sensível ao
+      sistema visual humano
+    - Comporta-se como onda e partícula
+    - Ondas eletromagnéticas que têm tamanho variando entre 350 e 750
+      nanômetros
+    - Ondas maiores aparecem como vermelho e menores como azul
+      (infra-vermelho e ultra-violeta)
+    - O espectro visível se divide em várias cores
+
+* Ray Tracing
+    - Uma maneira de formar uma imagem é seguir raios de luz encontrando
+      quais desses raios entram nas lentes da câmera.
+    - Entretanto, cada raio de luz pode ter múltiplas interações com
+      objetos antes de ser absorvido ou ir para o infinito.
+
+* Sistema visual humano
+    - Tem dois tipos de sensores
+    - Bastonetes
+        - Monocromátivos, visão noturna
+    - Cones
+        - Sensíveis a cores
+        - Três tipos: vermelho, verde e azul
+    - Processamento inicial da luz em humanos segue os mesmos
+      princípios da maioria dos sistemas óticos
+
+                        |  |\    .-----.
+                        |  | \  /`,  /||\   <- cones/bastonetes
+                        |  |  \(  ()/ || |  <- retina
+                        |  |  /(  ()\ || |\ nervo óptico
+                        |  | /  \,´  \||/\ \
+                        |  |/    `-----´  \
+                                 ^- cristalino
+
+* Câmera pinhole
+    - Plano de projeção p
+    - Projeção de p
+    - Centro de projeção
+
+* Vantagens
+    - Separação entre objetos, observador e gontes de iluminação
+    - Gráficos 2D tornam-se um caso especial dos gráficos 3D
+    - Impleca em uma API software mais simples
+        - Especificação de objetos, luzes, câmera e atributos
+        - A implementação determina a imagem
+
+* Iluminação global vs local
+    -  Não podemos simlesmente calcular a cor e o sombreamento de um
+       objeto de forma independente
+        - Alguns objetos são bloqueados da luz
+        - A luz pode refletir de objeto a objeto
+        - Alguns objetos podem ser translúcidos
+
+    - Sem fazer o ray tracing, não seguimos os raios de luz. Logo, em
+      geral não teremos sombras geradas automaticamente.
+    - Ou seja, ray tracing é mais realista, assumindo uma fonte global
+      de luz. Por outro lado, a câmera pinhole tem iluminação local
+      (simulada a partir de diferentes rotinas).
+    - É vantajoso usar a iluminação local, pois o ray tracing é
+      computacionalmente custoso. Porém, em alguns anos, é provável que
+      o ray tracing passe a ser usado diretamente.
+
+* Abordagem prática
+    - Processa um objeto de cada vez, na ordem que são gerados pela
+      aplicação
+    - Considera somente iluminação local
+    - Arquitetura do pipeline
+
+  Vertices ->  Vertex   -> Clipper and -> Rasterizer -> Fragment -> Pixels
+              processor     primitive                   processor
+                            assembler
+
+    - Todos esses passos podem ser implementados em Hardware (OpenGL e
+      WebGL os usam)
+
+* Processamento de vértices
+    - A maioeria do trabalho executado no pipeline diz respeito à
+      mudança de coordenadas
+
+* Projeções
+    - É o processo que combna o observador em 3D e objetos a fim de
+      produzir uma imagem em 2D
+        - Projeção perspectiva: todas as linhas de projeção se encontram
+          no centro de projeção
+        - Prokeção paralela: linhas de projação são paralelas, e o
+          centro de projeção é substituído pela direção de projeção
+
+* Agrupamento de vértices
+    - Vértices devem ser agrpados em objetos geométricos antes de
+      recorte e rasterização (linhas, triângulos, polígonos)
+
+* Recortes
+    - Assim como uma câmera real não consegue "ver" todo o universo, uma
+      câmera virtual pode somente enxerfar parte dele também
+    - Objetos que não estejam nesse volume são "recortados" da cena
+
+* Rasterização
+    - Se um objeto é recortado, cores devem ser atribuídas aos seus
+      pixels
+    - O processo de rasterização produz uma série de fragments para cada
+      objeto
+    - Fagmentos são ditos "pixels em potencial"
+        - Possuem uma posição no frame buffer
+        - Possuem atributos cor e profundidade
+    - O rasterizador interpola atributos de vértices entre todos
+
+* Fragmentos
+    - Fragmentos são produzidos a fim de determinar a cor do pixel
+      correspondetente no frame buffer
+    - Suas cores são determinadas através de mapeamento de textura ou
+      interpolação de cores entre vértices
+    - Fragmentos podem também estar sendo "bloqueados" por outros
+      fragmanetos mais próximos da câmera
+        - Remoção de superfícies escondidas

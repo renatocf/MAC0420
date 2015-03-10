@@ -1,0 +1,146 @@
+Objetos
+========
+
+* Especificação de objetos
+    - A maioria das APIs suportam um número limitado de primitivas
+        - Pontos (0D)
+        - Retas (1D)
+        - Polígonos (2D)
+
+* Exemplo OpenGL (antigo)
+
+                 .- tipo do objeto
+    glBegin(GL_POLYGON)   .- coordenadas do vértive
+        glVertex3f(0.0, 0.0, 0.0);
+        glVertex3f(0.0, 1.0, 0.0);
+        glVertex3f(0.0, 0.0, 1.0);
+    glEnd();
+        ^- fim da definição
+
+    - Cada uma dessas estruturas precisaria ser enviada repetidamente,
+      pois ela não era armazenada
+
+* Exemplo OpenGL (atual)
+    - Armazena vértices em um array
+
+    var points = [
+        vec3(0.0, 0.0, 0.0),
+        vec3(0.0, 1.0, 0.0),
+        vec3(0.0, 0.0, 1.0),
+    ];
+
+    var pts = new Float32Array();
+    pts[0] = 0.0; pts[1] = 0.0; pts[2] = 0.0;
+    pts[3] = 0.0; pts[4] = 1.0; pts[5] = 0.0;
+    pts[6] = 0.0; pts[7] = 0.0; pts[8] = 1.0;
+
+* Especificação da câmera
+    - Seis graus de liberdade
+        - Posição do centro da lente (COP)
+        - Orientação
+        - Lente
+    - Tamanho do filme
+    - Orientação do filme
+
+* Luzes e materiais
+    - Tipos de luzes
+        - Puntual
+        - Direcional
+        - Tipo "spot"
+    - Propriedade de materiais
+        - Absorção: propriedades da cor
+        - Reflexão
+        - Difusão
+        - Especular ("ponto de brilho")
+    - A luz e materiais é o grande ponto para criar cenas reais
+
+* Exemplos (OpenGL 1.1)
+
+    #include <GL/glut.h>
+
+    void mydisplay()
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+        glBegin(GL_POLYGON);
+            glVertex2f(-0.5,-0.5); /* Define polígono 2D */
+            glVertex2f(-0.5, 0.5);
+            glVertex2f( 0.5, 0.5);
+            glVertex2f( 0.5,-0.5);
+        glEnd();
+        glFlush(); /* Desenha */
+    }
+
+    int main(int argc, char **argv)
+    {
+        /* Precisamos interagir com o sistema de janelas do SO */
+        glutInit(&argc, argv);
+        glutCreateWindow("simple");
+        glutDisplayFunc(0.0, 0.5, 0.0, 1.0);
+        glutMainLoop();
+        /* Ao redimensionar a janela, rodaremos a função novamente */
+    }
+
+* Execução no browser
+                            URL
+      .---------.  -------------------> .------------.
+      | Browser |                       | Web server |
+      '---------'  <------------------- '------------'
+           |            Web page
+           |
+           |
+      .-----------.
+      | JS Engine |
+      '-----------'
+           |
+           |
+       .---------.
+       | CPU/GPU |
+       '---------'
+           |
+           |
+       .--------------------.
+       | .-------------.    |
+       | | Framebugger |    |
+       | '-------------'    | Canvas
+       '--------------------'
+
+* GLSL
+    - OpenGL Shadind Language
+    - Parecida com a linguagem C
+        - Vetores e matrizes (dimensões 2, 3, 4)
+        - Overloading
+        - Construtores estilo C++
+    - Similar à Cg da nvidia e HLSL da Microsoft
+    - Todos os códigos são enviados aos shaders
+
+* Exemplo (WebGL)
+
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <!-- Shader de pixels - só os repassa -->
+        <script id="vertex-shader" type="x-shader/x-vertex">
+          attribute vec4 vPosition;
+          void main()
+          {
+            gl_Position = vPosition;
+          }
+        </script>
+
+        <!-- Shader de fragmentos - define cor opaca -->
+        <script id="fragment-shader" type="x-shader/x-fragment">
+          precision mediump floa;
+          void main()
+          {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }
+        </script>
+
+       ...
+    </html>
+
+    square.js
+    var gl;
+    var points;
+
+    window.onload

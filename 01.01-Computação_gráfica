@@ -1,0 +1,44 @@
+História da Computação Gráfica
+===============================
+
+* Muitos algoritmos têm nomes dos fundadores da CG
+
+* 1980-1990
+    - Workstation x CPU
+        - Workstations eram de arquiteutura cliente-servidor
+    - Aumento do realismo
+    - Smooth shading (sombreamento), environment mapping (reflexos),
+      bump mapping (mapeamento de rugosidade)
+    - Hardware especializado
+        - Silicon Graphics "Geometry Engine"
+        - Implementaão do pipeline gráfico em VLSI
+    - Padrão da indústria
+        - RenderMan (Pixar) - API para produção de filmes
+        - PHIGS (3D) - API para modelagem 3D
+    - Gráficos em rede: X Window System
+
+* 1990-2000
+    - OpenGL API
+    - Filmes inteiramente gerados por computador (Toy Story, 1995)
+    - Novas capacidades em hardware
+        - Mapeamento de textura
+        - Blending (mistura)
+        - Buffers de acumulação e estêncil (máscara)
+        - Estas capacidades foram colocadas no OpenGL
+
+* 2000-2010
+    - FOtorrealismo
+    - Placas gráficas para PC dominam o mercado:
+        - NVidia, AMD (ex ATI), Intel
+        - Pipelines programáveis (GPU)
+    - Game boxes (videogames) determinam a direção do mercado
+    - CG se torna rotina em produções cinematográficas: Maya, Lightware
+    - Novas tecnologias de display
+
+* 2011-atual
+    - CG é ubíqua
+        - Telefones celulares
+        - Dispositivos embarcados
+    - OpenGL ES e WebGL
+    - Realidade alternatica e aumentada
+    - TVs e filmes em 3D
