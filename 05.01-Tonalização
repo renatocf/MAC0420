@@ -1,0 +1,125 @@
+Tonalização
+============
+
+* Triângulos
+    - Como podemos definir uma malha complexa de triângulos?
+        - Até agora, usávamos vértices e faces - e cada vértice
+          era repetido múltiplas vezes
+        - Para resolver isso, vamos manter uma lista de vértices
+        - Cada face do triângulo será INDEXADA por meio da posição
+          dos vértices nesta lista
+
+* Indexação de triângulos
+    
+    Triangle {
+        Vertex vertex[3];
+    }
+
+    Vertex {
+        float position[3]; // or other data
+    }
+
+    Mesh {
+        float verts[nv][3]; // vertex positions (or other data)
+        int tInd[nt][3]; // vertex index
+    }
+    
+    - No OpenGL/WebGL, usamos o comando 'glDrawElements' com uma tabela
+      de informaçẽoes de vértives e uma tabela de índices ordenando
+      estas faces dos vértices.
+
+    - Precisamos, também, sistematizar a ordenação dos vértices do
+      triângulo. De forma geral, usaremos a ordenação CONTRA O RELÓGIO.
+      Isso fará com que o cálculo das normais nos forneça vetores PARA
+      FORA (e eles serão usados para cálculos de luz e sombra, por
+      exemplo).
+
+* Orientação consistente
+    - Qual lado é a "frente" e a "traseira" da superfície e qual é o
+      "dentro" e "fora"?
+    - Regra: você está do lado de fora quando você vê os vértices na
+      direção anti-horária.
+    - Na grade, a vizinhança de triânculos deveria estar de acordo com a
+      frente.
+    - CUIDADO: isso nem sempre é possível
+    
+    - Se tivermos uma padronização de ordenação de "frente" e "trás",
+      o OpenGL pode otimizar a criação de fragmentos.
+
+* Função implícita
+    - Função implícita da esfera f(x,y,z) = 0
+        - f(x,y,z) = x² + y² + z²
+        - f(p) = p² - 1
+        
+    - Normal dada pelo gradiente de f
+        - n [ df/dx, df/dy, df/dz ]
+    
+    - No caso de uma esfera, o próprio ponto será o versor normal
+    
+    - Esse tipo de representação por FUNÇÃO IMPLÍCITA é melhor para
+      gerar normais e testar se um ponto pertence à superfície (no caso
+      do Ray Tracing)
+
+* Equação paramétrica
+    - Equação paramétrica do elipsóide
+    
+    - A equação paramétrica é muito mais simples para gerar as linhas
+    
+    - As normais são dadas fazendo o produto vetorial dos vetores
+      obtidos da derivada parcial.
+
+    - De formar geral, as equações paramétricas não são tão usadas
+      na criação do dia a dia
+
+    - A normal de cada ponto 
+
+* Modelo Blinn-Phong
+    - Para cada fonte de luz e componnente de cor, o modelo Blinn-Phong
+      pode ser descrito como:
+        
+        L = k_d*l_d*max(0,l.n) + k_s*l_s*max(0,n.h)^b + k_a*l_a
+             ^   ^                ^   ^
+             |   |                |   |                  |   '- intens.
+             |   |                |   |                  |      luz amb.
+             |   |                |   |                  '- cor reflexão 
+             |   |                |   |                     ambiente
+             |   |                |   '- intensidade luz especular
+             |   |                '- cor reflexão especular
+             |   '- intensidade luz difusa
+             '- cor reflexão difusa
+
+    - Atenuação por distância: na atenuação por distância, a, b e c são
+      os coeficientes e d é a distância entre posição da luz e do
+      vértice em questão.
+
+    - Em geral, calcularemos as cores em cada vértice, e depois
+      INTERPOLAMOS para definir as cores da face.
+
+* Processo de tonalização
+
+    - A tonalização por vértice requer que cálculos sejam feitos vértice
+      a vértice
+      - Cores dos vértices são enviados ao VERTEX SHADER como atributos
+      - Ou podemos enviar parâmetros da luz ao VERTEX SHADER e deixá-lo
+        calcular a cor do vértive
+      - Este método é mais EFICIENTE
+
+    - Por padrão, cores dos vértices são interpolados se passados ao
+      fragment shader utilizando 'varying'.
+      - Este método é mais ACURADO
+
+* Vetor normal
+    - A tonalização usando o VERTEX SHADER dá uma impressão com
+      cores suaves (por causa da interpolação).
+    - A tonalização usando o FRAGMENT SHADER dá uma impressão
+      facetada (porque cada face fica com uma cor única)
+
+* Existem duas tonalizações principais
+    - Tonalização Gouraud
+        - Determine a normal média em cada vértice
+        - Aplicar o modelo Blinn-Phong em cada vértice
+        - Interpolação de termos dentro do polígono
+        - Normais dos vértices são calculadas tomando a média das 
+          normais do vértice 
+    - Tonalização Phong
+        - Interpolação de normais no FRAGMENT SHADER

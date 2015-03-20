@@ -1,0 +1,65 @@
+Buffers
+========
+
+* No WebGL, cada canvas tem 4 buffers
+    - Front Buffer   (buffer com imagem atual)
+    - Back Buffer    (buffer com imagem a ser visualizada)
+    - Depth Buffer   (profundidade)
+    - Stencil Buffer ()
+
+    - O front buffer e o back buffer existem porque os monitores CRT
+      levavam algum tempo para serem atualizados.
+    - A escrita era feita SEMPRE no back buffer
+
+    - Antigamente, existia uma função 'gl_swapBuffers' para
+      trocar o back fuffer o o front buffer (passando o back para
+      o front)
+    - Hoje em dia, o WebGL troca o back e front buffer internamente
+
+    - O Stencil Buffer propõe uma máscara, e cada máscara permite que
+      apenas alguns elementos com algumas características sejam
+      visualizadas.
+    
+    - Todos estes buffers possuem memória localizada na GPU
+
+* Outros buffers
+    - O OpenGL desktop tinha outros buffers
+        - Auxiliary color buffers
+        - Acumulation buffers (agora deprecados)
+
+    - As GPUs possem memória localizada na placa de vídeo
+        - Texture buffers
+        - Off-screen buffers
+            - Não estão sob o controle do sistema de janelas e podem ser
+              'floating point'.
+            - Ex: renderizar uma cena no espelho. Usamos os off-screen
+                  buffers para criar a cena do ponto de vista do
+                  espelho, e depois colocamos essa cena como textura
+                  na cena que será exibida.
+
+* Todas estas situações têm um custo computacional CRESCENTE. E algumas
+  representações são bem complexas de sere feitas.
+
+* Tipos de mapeamento
+    - Textura
+        - Utilizam-se imagens para o preenchimento dos polígonos
+    - Ambiente (reflexão)
+        - Uma goto do ambiente é usada como textua
+        - Permite a smulação de superfícies altamente especulares
+    - Bump Mapping (rugosidade)
+        - Fazemos perturbações nas normais que levam a mudanças
+          de cores que levam a cores.
+
+* Mapeamento no pipeline
+
+    - Técnicas de mapeamento são implementadas no final do pipeline.
+    - É um método eficiente pois poucos polígonos sobrevivem ao
+      processo de recorte.
+
+    Vertices -> Geometry 
+                Pipeline \
+    (para vértices)       \
+                           |---> Rasterizer -> Fragment Shader
+    Pixels   -> Pixel     /
+                Pipeline /
+    (para imagens)

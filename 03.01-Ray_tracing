@@ -1,0 +1,159 @@
+Ray Tracing
+============
+
+* Ray tracing utiliza raios nas imagens
+
+* Duas abordagens
+    
+    for each object in the scene {
+        for each pixel in the image {
+            if (object affects pixel) {
+                do something
+            }
+        }
+    }
+    /* Rasterizer */
+
+    for each pixel in the image {
+        for each object in the scene {
+            if (object affects pixel) {
+                do something
+            }
+        }
+    }
+    /* Ray tracing */
+
+* O ray tracing começa com um pixel, e observa o que pertence àquele
+  pixel.
+* Temos um conjunto de pontos que projetam num ponto da imagem
+
+* Geração de raios
+    - Paralela (centro de projeção no infinito)
+    - Perspectiva (a câmera está em algum centro de projeção)
+    - Lentes (se estudarmos como os raiios mudam ao passar pela lente,
+      podemos alterá-lo).
+
+* Interface para câmeras
+    - Operação-chave: gerar raios para a posição da imagem
+        class Camera {
+            Ray generateRay(int col, int row);
+            /* args go from 0,0 to width-1,height-1
+        }
+
+    - Problema de modularização: câmeras não deveriam estar prezas
+      a uma proporção
+
+        class Camera {
+            Ray generateRay(float u, float v);
+            /* args go from 0,0 to 1,1
+        }
+
+* Intersecções
+    - Um raio pode ser representado por meio de um vetor
+    - Para representá-lo, usarmoes a representação: ponto p e direção d
+        r(t_ = p + td
+        - Representação paramétrica da linha
+        - Gera pontos diretamente sobre a linha
+        - Se a restrição para t > 0, então temos um raio
+
+    - Intersecção entre raio e esfera
+        - Condição 1: pontos em um raio
+            r(t) = p + td
+        - Condição 22: ponto numa esfera
+            - assumindo uma esfera unitária
+            ||x|| = 1 ↔ ||x||² = 1
+            f(x) = x*x-1 = 0
+        - Substituindo:
+            f(r(t)) = (p + td)*(p + td)
+            f(r(t)) = p² + 2*ptd + t²d²
+        - Resolvemos a equação de segundo grau. Se d for o vetor
+          unitário, então teremos d²=1 (tirando a parte de baixo da
+          equação).
+
+    - Para objetos mais complexos, vamos usar a intersecção com a
+      representação em triângulos.
+
+    - O que é mais barato? Usar círculos de verdade ou usar os
+      aproximados por triângulos? Como círculos aproximados por
+      triângulos precisam de MUITOS triângulos, compensa a 
+      intersecção com círculo.
+
+    - Em geral, para objetos complexos, usa-se uma 'caixa' que
+      envolve o objeto, para limitar os raios. Então, aplica-se
+      o refinamento dos raios.
+
+    - Intersecção entre raio e triângulo
+        - Usaremos as cooredenadas baricêntricas.
+            
+              c ^        Um ponto qualquer é dado por:
+               /         x = a + β(b-a) + γ(c-a)
+              / x        
+             /           β, γ ∈ [-∞,∞]
+          a *------> b   
+                         Para que estejamos dentro do triângulo,
+                         precisamos que β > 0, γ > 0, β + γ < 1
+
+* Tonalização
+    - Computa a ruz refletida pela câmera
+    - Entrada
+        - Direção da câmera
+        - Direção da luz (para cada um dos focos de luz)
+        - Superfície normal
+        - Parêmetros da superfície (cor, brilho, etc)
+
+    - Pode ser que usemos o ângulo entre o vetor da luz e o
+      vetor do observador OU o vetor da luz e o vetor normal
+      à superfície.
+
+* Aproximação por raio
+    - Raio é perpendicular a fronteira de propadação da onda
+    - Fontes são supostas pontuais
+    - Simularemos o princípio de Huygens (de ondas geradas a cada ponto
+      da superfície)
+
+* Comportamento dos raios
+    - Ao atingir fronteiras entre meios e materiais distintos, temos de
+      considerar todas as propriedades relacionadas aos raios de luz:
+        - Reflexão
+        - Refração
+        - Difração
+
+* Reflexão
+    - Quando um raio de luz viajando em um meio encontra a fronteira de
+      outro meio, parte da luz incidente é refletida.
+    - Segundo as leis da Física, o ângulo refletido será igual ao ângulo
+      de incidência. Com as expressões de vetores, conseguimos fazer o
+      vetor de um com o vetor de outro.
+    
+    - Tipos de reflexão
+        - Reflexão difusa: 
+            - A maiora dos objetos, cujas superfícies são
+              naturalmente rugosas, dão origem à reflexão difusa
+            - A luz é refletida niformemente em todas as direções
+                - A cor da superfície é a mesma para todos os pontos
+                  de vista.
+            - Precisamos calcular cos(θ) = l*n 
+
+    - Atenuação por distância
+        - Em geral, a luz perde energia conforme a distância
+        - Para atenuarmos a internsidade, usaremos que, na média,
+          a intensidade a uma distância 'r' do emissor será 'I/r²'
+          (sendo I a original).
+
+    - Reflexão Lambertiana
+        - A iluminação da visualização e da direção
+        
+        
+            L_d = k_d (I/r²) max(0,n*l)
+             ^     ^    ^       ^- vê o normal OU 0, caso a luz
+             |     |    |          esteja atrás
+             |     |    '- iluminação
+             |     '- vetor RGB
+             '- difusão da luz refletida
+
+* Sombras
+    - Superfícies são iliminadas apenas se não houver objetos bloqueando
+      a visualização da luz
+    - Com ray tracing para fazer a sombra é simples: quando vamos
+      calcular a cor, se tivermos o raio de luz se intersectando em
+      algum objeto.
