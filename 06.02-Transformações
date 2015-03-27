@@ -1,0 +1,317 @@
+Transformações
+===============
+
+* Mapeamentos entre diferentes espaços-vetoriais
+    - A iluminação já era um tipo de mapeamento, que usavam informações
+      da ilumunação especular e difusa para criar as cores dos objetos
+
+* Objetos geométricos
+    - A geometria estuda os relacionamentos entre objetos em um espaço
+      n-dimensional
+    - Em GG, estamos interessados em objetos que existem nas dimensões 2
+      e 3D
+    - Trataremos de pontos, retas e triângulos
+
+* Escalares
+    - Membros de conjuntos que podem ser operados por meio de 2
+      operações: adição e multiplicação.
+
+* Vetores
+    - Um vetor é uma quantidade com 2 atributos: magnitude e direção.
+
+* Operaçẽos com vetores
+    - Todo vetor possui um vetor inverso (mesma maginitude, mas direção
+      oposta)
+    - todo vetor pode ser mulgiplicado por um escalar
+
+* Espaços vetoriais
+    - Operações: multiplicação escalar-vetor e adição vetor-vetor.
+    - Permite expressões como v = u + 2w - 3r, que fazem sentido em um
+      espaço vetorial.
+
+* Vetores não possuem posição
+    - Vetores são idênticos se têm a mesma orientação e magnitude
+    - Espaços vetoriais são insuficientes para a geometrica (precisamos
+      de PONTOS).
+
+* Pontos
+    - Posição no espaço
+    - Operaçẽos entre pontos e vetores
+        - Subtração entre pontos
+        - Adição entre ponto e vetor
+
+* Espaço vetorial afim
+    - Soma de vetores
+    - Multiplicação por vetor escalar
+    - Subtração de pontos
+    - Soma de ponto com vetor
+
+* Retas
+    - Pontos na forma P(α) = P_0 + αd
+    - Conjunto de todos os pontos que passam por P_0 na direção
+      do vetor d
+
+    - Forma paramétrica da reta
+        - Mais robusta e geral que outras forma
+        - Estensível para curvas e superífices
+        - Formas bidimensionais
+            - Explícita: y = mx + h
+            - Implícita: ax + by + c = 0
+            - Paramétrica:
+                x(t) = x_0 + t*v_x
+                y(t) = y_0 + t*v_y
+        - A forma paraétrica é uma das mais úteis para CG
+
+* Convexidade
+    - Um objeto é convexo se e somente se para quaisquer dois pntos no
+      objeto, todos os pontos no segmento de reta entre estes dois
+      pontos também pertencem ao objeto.
+    - Todo triângulo é convexo, por construção
+
+* Fecho convexo
+    - Menor objeto convexo que contém P1, P2, ..., Pn, com
+      P = α1*P1 + α2*P2 + ... + αn*Pn, com  α1 + α2 + ... + αn = 1
+      e αi >= 0.
+
+* Curvas e superfícies
+    - Curvas são entidades baseadas em um parâmetro P(α) onde a
+      função é não-linear
+    - Superfícies são formadas por funções de parâmetros P(α,β)
+    - Funções lineares dão origem à polígonos e planos
+
+* Planos
+    - Um plano pode ser definido por um ponto e dois vetores ou por
+      três pontos.
+
+    - Ex:
+        P(α,β) = R + αu + βv → P(α,β) = α(Q-R) + β(P-Q)
+
+* Triângulos
+    - O triângulo é convexo se qualquer ponto pode ser representado
+      pela soma afim:
+         P(α1,α2,α3) = α1*A1 + α2*A2 + α3*Α3
+
+* Independência linear
+    - Um conjunto de vetores v1, v2, ..., vn é linearmente independente
+      somente quando α1v1 + α2v2 + ... + αnvn = 0 e α1+α2+...+αν = 0
+
+    - Precisamos da independência linear para criarmos uma base para
+      o espaço vetorial - que servirá de referência para nossos objetos
+
+* Dimensão
+    - Número máximo de vetores linearmente independentes
+    - Em um espaço n-dimensaional, qualquer conjunto de n vetores
+      linearmente independentes formam uma BASE para o espaço
+
+* Representação
+    - Até o momento, temos trabalhado om entidades geométricas sem
+      utilizar um referencial (i.e. sistema de coordenadas)
+    - Mas precisamos de um referencial para calcularmos distâncias
+      e localizações em nosso mundo
+        - Coordenadas do mundo
+        - Coordenadas da câmera
+
+* Sistema de coordenadas
+    - Considere uma base v1, v2, ..., vn
+    - Um vetor é expreso como v = α1v1 + α2v2 + ... + αnvn
+    - A lista de escalares {α1, α2, ..., αn} é a representação
+      do vetor com relação à sua base
+
+* Exemplos
+    - Essa representação é dependente de uma base particular
+    - No OpenGL, WebGL, utilizaremos vetores para descrever uma base
+      representativa do objeto, e masi tarde bases para a câmera ou
+      do observador.
+
+* Sistema de referência
+    - Um sistema de coordenadas é suficiente para representar pontos
+    - Se trabalharmos em um espaço afim, poderemos adicionar um ponto,
+      a ORIGEM, para nos referenciarmos
+
+    - Sistemas de referência podem ser representados pela tupla
+      (P0, v1, v2, v3)
+
+    - Cada vetor pode ser então expresso por
+        v = α1v1 + α2v2 + ... + αnvn
+
+    - Cada onto pode ser representado como
+        P = P0 + β1v1 + β2v2 + ... + βnvn
+
+    - Dessa maneira, podemos representar, formalmente, qualquer
+      ponto ou vetor
+
+* Condusão entre pontos e vetores
+
+    v = α1v1 + α2v2 + ... + αnvn
+    P = P0 + β1v1 + β2v2 + ... + βnvn
+
+    - Ambos possuem representação semelhante. Como separá-los
+
+* Uma única representação
+    - Que tal definirmos vetores e pontos com uma coordenada adicional?
+   
+        v = α1v1 + α2v2 + α3v3 = [α1 α2 α3 0][v1 v2 v3 P0]^T
+        P = P0 + β1v1 + β2v2 + β3v3 = [β1 β2 β3 1][v1 v2 v3 P0]^T
+
+    - Desta forma, obtemos uma representação quadridimensional
+      chamada de 'coordenadas homogêneas'
+
+                v = [α1 α2 α3 0]        P = [β1 β2 β3 1]
+
+
+* Translação
+                  * Q       | - Podemos representar uma translação 
+                 ^          |   em termos de multiplicação
+                /           |   entre matriz e vetor?
+               /            |   
+              /             |   [Qx] = [m11 m12][Px]
+             /              |   [Qy]   [m21 m22][Py]
+            * P             | 
+                            |   Não temos como colocar o ponto!
+      [Qx] = [Px] + [dx]    | 
+      [Qy]   [Py]   [dy]    | - E se usarmos coordenadas homogêneas?
+                            |
+                            |   [Qx] = [1 0 dx][Px]
+                            |   [Qy]   [0 1 dy][Py]
+                            |   [ 1]   [0 0  1][ 1]
+                            |
+                            |   Agora temos a soma como na forma
+                            |   vetorial comum!
+                            |
+
+* Coordenadas homogêneas
+    - Coordenadas homogêneas permitem unificar o tratamento de vetores e
+      pontos
+    - Problema é levado para uma dimensão superior:
+        - Coordenada extra w=0 para vetores e x=1 para pontos
+        - Termos independentes formam uma coluna extra na matriz
+          de transformação
+
+                [x'] = [a b c][x]    [x'] = [a b c][x]
+                [y']   [d e f][y]    [y']   [d e f][y]
+                [ 1]   [0 0 1][1]    [ 0]   [0 0 1][0]
+
+        - Os parâmetros a..f variarão conforme o tipo de transformação
+        - Para deslocamento, temos uma matriz identidade com a 3ª
+          coluna sendo as dimensões do deslocamento
+        - Se não usarmos a identidade, faremos uma ESCALA.
+
+* Troca de sistemas de coordenadas
+    - Considere duas representaçẽos do mesmo vetor em duas bases
+      diferentes:
+
+        a = [α1 α2 α3]
+        b = [β1 β2 β3]
+
+    - Cada um dos vetores da base secundária u1, u2, u3 podem
+      ser representados em função da 1ª base:
+        
+        u1 = γ11*v1 + γ12*v2 + γ13*v3
+        u2 = γ21*v1 + γ22*v2 + γ23*v3
+        u3 = γ23*v1 + γ23*v2 + γ33*v3
+
+    - Estes coeficientes determinam uma matriz 3x3:
+
+                [γ11 γ12 γ13]
+            M = [γ21 γ22 γ23]
+                [γ23 γ23 γ33]
+
+    - As bases se relacionam por meio da transformação u = Mv
+    
+    - Para fazer a transformação, podemos fazer:
+        
+        w = α1v1 + α2v2 + α3v3 = [α1 α2 α3]^T[v1 v2 v3]
+          = β1u1 + β2u2 + β3u3 = [β1 β2 β3]^T[v1 v2 v3]
+
+        w = b^T*u = b^T*Mv = a^T*v
+
+* Prokeções na pipeline
+    - Na pipeline, teremos 3 transformações
+        1. IR³ → IR³ (MODELAGEM: modelagem dos objetos, trocando
+                      posição, rotação, tamanhos, etc.)
+        2. IR³ → IR³ (REFERENCIAL: troca de referencial do mundo
+                      para a câmera)
+        3. IR³ → IR² (PROJEÇÃO: ponto de projeção da câmera para plano
+                      de projeção)
+        
+                z |           _____     yC `.         .- xC
+                  |           \    \         `.    .-´
+                  |            \    \          `.-´
+                  |             \    \          | C
+                O |__________    \    \         |
+                 /           x    \    \        |
+                /                  \    \         zC
+               /                    \____\
+              /
+             y                    Plano de projeção
+
+* Trocas entre referenciais
+        
+        u1 = γ11*v1 + γ12*v2 + γ13*v3           [γ11 γ12 γ13 0]
+        u2 = γ21*v1 + γ22*v2 + γ23*v3       M = [γ21 γ22 γ23 0]
+        u3 = γ31*v1 + γ32*v2 + γ33*v3           [γ31 γ32 γ33 0]
+        Q0 = γ31*v1 + γ32*v2 + γ33*v3           [γ41 γ42 γ43 1]
+
+    - Quais serão os parâmetros que aplicaremos?
+            
+
+* Sistema de mudno e da referência
+
+    - QUando trabalharmos com representações, utilizaremos
+      n-tuplas ou arrays de n escalares.
+
+    - Mudanças em sistemas de referências são definidas por
+      matrizes 4x4.
+
+    - No OpenGL/WebGL, o referencial total primário é o
+      referencial do mundo.
+
+    - Eventualmente, representaremos entidades no sistema da câmera,
+      mudando a representação do mudno utilizando uma matriz
+      (i.e. model-view)
+        - Inicialmente elas são elas mesmas (M=1)
+
+    - A matriz model-view é o mesmo que fazer a MODELAGEM (de TROCAR
+      a posição) e já passar para o REFERENCIAL da câmera.
+
+* Movimentando a câmera
+     - Se objetos estão localizados em ambos os lados do z=0,
+       devemos mudar a posição da câmera
+
+    - Para deslocar a câmera "para trás" com relação ao eixo z,
+      fazemos:
+
+                [1 0 0 0]      :         z |           
+            M = [0 1 0 d]      :           |                            
+                [0 0 1 0]      :           |                            
+                [0 0 0 1]      :           |                            
+                               :         O |__________ 
+                               :          /           x
+                               :         /     /       
+                               :        /     /       
+                               :      y      /       
+                               :           |/ 
+                               :       .-------.
+                               :      /------./|
+                               :      |      | |
+                               :      |______|/
+
+* Usando transformações
+
+    - Na pipeline, podemos ter uma transformação 0: INSTANCIAMENTO,
+      em que criamos um objeto segundo um sistema de referencial
+      LOCAL e, depois, com rotações/escalas/deslocamentos
+      colocar este objeto em vários locais distintos:
+
+        0. IR³ → IR³ (INSTANCIAÇÃO: colocação de objetos na cena
+                      a partir de um referencial local)
+        1. IR³ → IR³ (MODELAGEM: modelagem dos objetos, trocando
+                      posição, rotação, tamanhos, etc.)
+        2. IR³ → IR³ (REFERENCIAL: troca de referencial do mundo
+                      para a câmera)
+        3. IR³ → IR² (PROJEÇÃO: ponto de projeção da câmera para plano
+                      de projeção)
+
+    - Em uma animação, objetos em uma cena se movimentam
+    - Esta movimentação é criada através de translações e rotações
+    de seus sitemas de coordenada 

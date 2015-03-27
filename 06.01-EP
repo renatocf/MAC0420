@@ -1,0 +1,7 @@
+Exercício-Programa
+====================
+
+* Flatten shading
+    - Passar direto os vetores
+* Smooth shading
+    - Recalcular os vetores no fragment shader
