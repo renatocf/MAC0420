@@ -1,0 +1,287 @@
+Transformações
+===============
+
+* Translação
+    - Mover um ponto para uma nova posição
+    - Translação determinada pelo vetor 'd'
+        - P' = P + d
+    - Quantos graus de liberdade?
+        - 2D: 2 graus (dimensão do vetor)
+        - 3D: 3 graus (dimensão do vetor)
+    - Para mover um objeto, basta transladarmos cada ponto pelo
+      mesmo vetor.
+
+* Coordenadas homogêneas
+    p  = [ x   y   z  1]^T
+    p1 = [ z'  y'  z' 1]^T
+    t  = [t_x t_y t_z 0]^T
+
+* Matriz de translação
+    
+    [x']   [1 0 0 t_x] [x]
+    [y'] = [0 1 0 t_y]*[y]
+    [z']   [0 0 1 t_z] [z]
+    [1 ]   [0 0 0  1 ] [1]
+
+* Matriz de escala
+
+                    [x']   [s_x  0   0   0] [x]
+                    [y'] = [ 0  s_y  0   0]*[y]
+                    [z']   [ 0   0  s_z  0] [z]
+                    [1 ]   [ 0   0   0   1] [1]
+
+    - Antes de fazer a escala, é necessário que levemos o objeto
+      até a origem. Caso contrário, pode haver distorções.
+    - Devemos fazer a movimentação tendo como referência o centro
+      de massa (distância máxima - distândia mínima / número pontos)
+
+* Reflexão
+
+    - A reflexão consegue fazer a escala, apenas trocando o sinal
+
+                    [x']   [s_x  0   0   0] [x]
+                    [y'] = [ 0  s_y  0   0]*[y]
+                    [z']   [ 0   0  s_z  0] [z]
+                    [1 ]   [ 0   0   0   1] [1]
+
+* Inversas
+
+    - A inversa da translação é dada tomando o OPOSTO de cada
+      elemento t_i
+                      [x']   [1 0 0 -t_x] [x]
+                      [y'] = [0 1 0 -t_y]*[y]
+                      [z']   [0 0 1 -t_z] [z]
+                      [1 ]   [0 0 0   1 ] [1]
+
+    - A inversa da escala é dada tomando o INVERSO de cada
+      elemento s_i
+
+                  [x']   [1/s_x   0     0    0] [x]
+                  [y'] = [  0   1/s_y   0    0]*[y]
+                  [z']   [  0     0   1/s_z  0] [z]
+                  [1 ]   [  0     0     0    1] [1]
+
+* Operação de escala
+
+    - Consideramos t = c-o o vetor do centro de massa de um
+      objeto até a origem.
+
+    - Para fazermos uma escala, precisamos realizar 3 operações:
+        - Translação para a origem T(-t)
+        - Escala S(2)
+        - Translação para posição original T(t)
+
+    - A operação de movimentação de um ponto será:
+        v_i' = T(t)*S(2)*T(-t)*v_i
+                         ^^^^^- primeira operação
+
+* Rotação em 2D
+
+    - Podemos considerar uma rotação como sendo:
+        - x'= r*cos (φ + θ)
+        - y'= r*sin (φ + θ)
+
+    - A matriz de rotação final fica:
+
+            x = [cos(θ) -sin(θ) 0]^T
+            y = [sin(θ)  cos(θ) 0]^T
+            z = [ 0        0    1]^T
+
+* Rotação em 3D
+
+    - Podemos considerar uma rotação 2D em 3D (sobre z) como sendo:
+        - x'= r*cos (φ + θ)
+        - y'= r*sin (φ + θ)
+        - z'= z
+
+    - A matriz de rotação final fica:
+           [x'] = [cos(θ) -sin(θ) 0  0]
+           [y'] = [sin(θ)  cos(θ) 0  0]
+           [z'] = [ 0        0    1  0]
+           [1 ] = [ 0        0    0  1]
+
+    - Para mover com relação a outros dois, podemos apenas trocar
+      a posição dos ângulos no 3D:
+
+           [x'] = [cos(θ) 0 -sin(θ) 0]
+           [y'] = [ 0     1   0     0]
+           [z'] = [sin(θ) 0  cos(θ) 0]
+           [1 ] = [ 0     0    0    1]
+
+           [x'] = [ 1   0       0    0]
+           [y'] = [ 0 cos(θ) -sin(θ) 0]
+           [z'] = [ 0 sin(θ)  cos(θ) 0]
+           [1 ] = [ 0   0       0    1]
+
+* Rotação em torno de eixo arbitrário
+    
+    - Desejamos rotacionar 'u' para transformar P em Q
+    - Decompor a transformação em passos:
+        - Duas rotações para alinhar 'u' com o eixo 'z'
+        - Rotacionar 'β' com o eixo x
+        - Fazer a rotação
+        - Desfazer as rotações existentes
+
+        R(β) = Rz(φ)*Ry(θ)*Rz(β)*Ry(-θ)*Rz(-φ)
+
+* Rotações arbitrárias
+    - Quaisquer rotações em 3D em torno de um eixo (que passa pela
+      origem) pode ser obtido através do produto de 5 matrizes com
+      ângulos de Euler apropriados.
+    - Isso implica que somente três valores são ecessários para
+      especificar qualquer rotação!
+        
+        R(θ) = Rz(θ_z)*Ry(θ_y)*Rx(θ_x)
+
+* Ângulos de Euler
+    - Um objeto pode ser orientado arbitrariamente
+    - Ângulos de Euler acumulam 3 rotaçãos nos eixos de coordenadas
+    - Recebem diferentes nomes dependendo do contexo de aplicação
+        - "Heading, elevation, bank" - aeronaves
+
+* Rotações com Euler
+    R(θ_x,θ_y,θ_z) = Rz(θ_z)*Ry(θ_y)*Rx(θ_x)
+
+
+    R(θ_x,θ_y,θ_z) = [ cycz  sxsycz-cxsz
+
+* Inversas
+    - Podemos calcular inversas das matrizes de rotação por meio de
+      fórmulas genéricas, mas observamos que R^-1(θ) = R(-θ).
+    
+    - Satisfeita por qualquer matriz de rotação
+        - cos(-θ) =  cos(θ)
+        - sin(-θ) = -sin(θ)
+        - R^-1(θ) = R(-θ) = R^T(θ)
+            - Toda matriz de rotação é ORTOGONAL.
+
+* Propriedades
+    - Translações: parte linear é a matriz identidade
+    - Escalas: parte linear é uma matriz diagonal
+    - Rotações: parte linear é ortogonal
+        - A transposta é igual a sua inversa
+        - As colunas de R são mutuamente ortonormais: RR^T = R^TR = 1
+        - E o determinante de R é 1.0 [ det(R) = 1 ]
+
+               parte linear -......   .- parte afim
+                             ||||||   |
+                        T = [(a b c) (d) 0]
+                            [(e f g) (h) 0]
+                            [(i j k) (l) 0]
+                            [ 0 0 0   0  1]
+
+    - Todas estas matrizes (para as 3 transformações) são bases, e
+      por esse motivo, fazer uma transformação é como mudar o
+      sistema de referências.
+
+* Composição
+    - Podmeos criar matrizes de transformação arbritrárias multiplicando
+      matrizes de rotação, translação e escala.
+    - A matriz à direita é a primeira a ser aplicada
+    
+    - Todas as relaçãos são matematicamante equivalentes:
+        
+        p' = ABCp = (AB)(Cp) = A(BC)p = A(B(Cp))
+        p' = Mp, M = ABC
+
+* Instanciamento
+    - Na fase de modelagem, é comum desenharmos com um único objeto,
+      centralizado na origem, orientado nos eixos canônicos, de tamanho
+      unitário
+    - Aplicaremos uma transformação de instancialemnto para:
+        - Redimensionar
+        - Orientar
+        - Posicionar
+
+* Cisalhamento (sheaning)
+    - Útil na confecção de mais uma transformação básica.
+    - Equvalente à forças aplicadas em direções opostas.
+
+                            z
+                            ^
+                           _|________
+                         .´         .´
+                        ´__________´ /
+                       /          / /
+                      /          / ____> y
+                     /          /.
+                    /__________/´
+                         /
+                        /
+                       \/ x
+
+    - Matriz de cisalhamento
+
+        [x']   [1 ? 0 0][x]     x' = x + αy
+        [y'] = [0 1 0 0][y]     y' = y
+        [z']   [0 0 1 0][z]     z' = z
+        [ 1]   [0 0 0 1][1]
+        
+        tan(θ) = y/(x'-x) → cot(θ) = (x'-x)/y
+    
+    - Matriz de cisalhamento
+
+                        [x']   [ 1 (0  0) 0][x]
+                        [y'] = [(0  1  0) 0][y]
+                        [z']   [(0  0) 1  0][z]
+                        [ 1]   [ 0  0  0  1][1]
+
+* Propriedades
+    - Transçaões não alteram a área ou volume
+    - Para uma escala pura, a nova área é S_xS_y vezes a área original
+    - Para um cisalhamento em um único eixo, a nova área é a mesma que a
+      área original.
+    - Em 3D, o resultado é análogo.
+
+* Transformações de vetores normais
+
+    - Transformando superfícies normais:
+
+    - Diferença de pontos (e, portanto, tangentes) uniformes: OK
+
+    - Usamos, para as normais, a inversa da transposta:
+
+        - Temos:           t*n = t^T*n = 0
+        - Queremos:        M*t * X*m = t^T*M^TX*n = 0
+        - Então colocamos: X = (M^T)^-1
+        - Então:           M*t *X*n = t^T*M^T*(M^T)^-1*n = t^T*n = 0
+
+* Matriz de transformação
+
+    - Conceitualmente, existe uma matriz de transformação corrente (CTM)
+      que utilizamos para aplicar em todos so vértices.
+    - Ela é, normalmente, definida na aplicação e passada para os
+      shaders.
+
+                                  C
+                            p     |
+                                  ^   p' = Cp
+                vertices ------> CTM ---------> vertices
+
+* Matrix model-view
+    - No WebGL, ela é usada para:
+        - Posicionar a câmera
+        - Pode ser usada para rotações e translações, mas é
+          frequentemente mais simples usar a função 'lookAt()'
+          do MV.js
+    - q = P*M_v*p
+
+* Matrizes arbitrárias
+    - Podem ser carregadas por matrizes definidas na aplicação do
+      programa.
+
+* Estrutura de dados
+    - Rerpesentação dos objetos ("cena")
+    - Lista de objetos
+    - Transformação para cada objeto
+
+* Grupos de objetos
+    - Trara um conjunto de objetos como um
+    - Cria uma hierarquia entre os objetos
+
+* Grafo de cena
+    - Nome dado a vários tipos de estruturas de grafos
+      (nós conectados juntos) usados para representar cenas
+    - Forma mais simples: árvore
+        - Cada nó tem um pai
+        - Folhas têm um nó identificado com objetos na cena
