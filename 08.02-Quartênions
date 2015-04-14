@@ -1,0 +1,129 @@
+Quartênions
+============
+
+* Números complexos
+    - ℂ = { a + bi: a,b ∈ ℝ, i² = -1 }
+    - |a + bi| = √a²+b²
+    - a + bi + c + di = (a+b) + (c+d)i
+    - (a+bi)(c+di) = (ac - bd) + (ad + bc)i
+
+* Euler encontrou uma maneira mais simples de mmultiplicar números
+  complexos:
+                        e^iφ = sin(φ) + i*cos(φ)
+
+* O tamanho e^iφ serve como unidade para o plano dos complexos
+    - Qualquer número complexo pode ser representado por meio de
+      coordenadas polares, como r*e^iφ
+
+    - Tomando a multiplicação
+        - (a+bi)(c+di) = (ac - bd) + (ad + bc)i
+
+    - Teremos:
+        - a + bi = re^iφ
+        - c + di = se^iθ
+        - (a+bi)(c+di) = re^iφ*se^iθ = rse^i(φ+θ)
+
+    - Se tivermos 'r' e 's' com tamanho unitário, esse produto
+      será uma ROTAÇÃO.
+
+* A álgebra dos números complexos funciona muito bem para rotações
+  do IR². Mas como seria para o IR³? Hamilton generalizou o conceito
+  para o IR^4 - os quartênions - que suportam a dimensão extra.
+
+* Quartênions (espaço imaginário)
+    - Uma extensão dos números complexos
+    - Dos quatro componentes, um deles é um número real, e os outros
+      formar um vetor no espaço imaginário ijk
+
+        v = [ q0 q1 q2 q3 ]
+
+        i² = j² = k² = ijk = -1
+        i = jk = -kj
+        j = ki = -ik
+        k = ji = -ij
+
+    - Propriedades
+        
+        q1*q2 != q2*q1
+
+        (q1*q2)*q3 = q1*(q2*q3)
+        (q1+q2)*q3 = q1*q3 + q2*q3
+        q3*(q1+q2) = q3*q1 + q3*q2
+        α*(q1+q2) = α*q1 + α*q2
+
+        (αq1)*q2 = α(q1*q2) = (α*q1*q2)
+
+    - Quartênions unitários
+        - Para nossa conveniência, usaremos quartênions unitários, por
+          serem suficientes ara nossos propósitos.
+                           ______________________
+                    |q| = √q0² + q1² + q2² + q3²' = 1
+
+        - Eles correspondem a um conunto de vetores que formam uma
+          "superfície" na hiperesfera de raio 1.
+
+        - Esta "superfície" é na verdade um volume (3D) no espaço 4D
+            - Pode ser visualizada como uma extensão do conceito de uma
+              superfície 2D em uma esfera 3D
+
+        - Usamos a álgebra dos quartênions sobre a hiperesfera
+          unitária para termos rotações em 3D
+
+    - Produto interno
+                            p*q = |p||q|*cosφ
+
+    - Quartênions unitários como rotações
+        - Um quartênio pode rperesentar uma rotação θ ao redor de
+          um eixo unitário 'a'
+            
+            q = [ cos(θ/2), a_x*sin(θ/2), a_y*sin(θ/2), a_z*sin(θ/2) ]
+            
+            ou
+            
+            q = ⟨ cos(θ/2), a*sin(θ/2) ⟩ 
+
+        - Para termos uma mudança entre 2 rotações, usamos uma
+          interpolação entre os valores dos quartênions no IR^4.
+          Nesse espaço, não temos o "Gimbol Lock", e conseguimos
+          uma representação ÚNICA sem mudanças.
+
+    - Quartênions unitários e rotações
+        - Assuma p=<0,v>, um quartênio que representa um ponto 3D
+          (normalizado).
+
+        - Assuma um quartênio de rotação unitário 'r' que codifica
+          a rotação ao redor de um certo eixo.
+
+        - A transformação abaixo rotaciona o ponto 'p' por meio de
+          'r', que resulta na nova posição p' = r*p*r^-1
+            - Esse produto é necessária para a rotação no espaço
+              dos quartênions funcionar.
+            - O 'r' pode representar um produtório, com múltiplas
+              rotações sendo realizadas.
+            - Na hiperesfera de raio unitário, r^-1 = r_conjugado,
+              e teremos contas mais eficientes.
+            - Existe uma DUALIDADE do ângulo. Ao expandir os produtos,
+              temos termos quadráticos.
+
+        - Novamente, p' é um quartênion com parte escalar 0 e parte
+          vetorial que determina as coordenadas do ponto em 3D.
+
+* Hiperesferas
+    - Uma distância 'x' ao longo da superfície da hiperesfera
+      corresponde à rotação por 2x radianos.
+    - Iso significa que o movimento ao longo de um arco de 90
+      graus corresponde à rotação de 180 graus.
+    - Isso implica que 'q' e '-q' representam a mesma orientação.
+
+    - Interpolação na esfera
+        - Interpolação linear (Lerp)
+            - Equação parametrizada da reta
+                P_L(t) = (1-t)*P + t*P' = P + t(P'-P)
+
+        - Interpolação esférica (Slerp)
+            - Precisamos levar em conta o ângulo relativo ao arco
+              correspondete ao menor caminho
+
+                       sin[(1-t)Ω]       sin[(t)Ω]
+              P_s(t) = ----------- * P + --------- * P' 
+                         sin(Ω)            sin(Ω)

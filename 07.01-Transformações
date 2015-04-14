@@ -61,6 +61,10 @@ Transformações
                   [z']   [  0     0   1/s_z  0] [z]
                   [1 ]   [  0     0     0    1] [1]
 
+    - A inversa da matriz de rotação é a matriz transposta,
+      pois toda matriz de rotação é ortornormal (e a inversa de
+      matrizes ortonormais é, sempre, a transposta).
+
 * Operação de escala
 
     - Consideramos t = c-o o vetor do centro de massa de um

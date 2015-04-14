@@ -1,0 +1,71 @@
+Rotações
+=========
+
+* Rotações
+
+    - Veremos como fazer modificações entre matrizes que
+      representam rotações.
+
+    - Úteis para animação
+        - Objetos
+        - Câmera
+    - Descrição de modelos articulados
+        - Corpo humano
+        - Robôs
+    - Orientações de corpos rígidos
+    - 2D ou 3D
+
+* Rotações em 3D
+    - RR^T = R^TT = I
+    - det(R) = 1
+
+        [ r11 r12 r13 ]
+    R = [ r21 r22 r23 ]
+        [ r31 r32 r33 ]
+
+    - Colunas (ou linhas) da matriz formam uma base ortornormal
+      para o R^3.
+
+* Ângulos de Euler
+    - Representaçõa de uma orientação por meio de 3 números
+    - Uma sequência de rotações ao redor de eixos principais é chamada
+      de sequência angular de Euler
+    - Assumindo um limite de até 3 rotações, sem rotações sucessivas
+      no mesmo eixo, podemos utilizar quaisquer destas 12 combinações:
+
+                    XYZ      XZY      XYX      XZX
+                    YXZ      YZX      YXY      YZY
+                    ZXY      ZYX      ZXZ      ZYZ
+
+    - As rotações com apenas 2 eixos existe porque, em algumas
+      rotações, uma das alterações é como se estivéssemos mudando
+      a referência para um dos eixos.
+
+* Ordem das rotações
+    - Como a multiplicação de matrizes não é comutativa, a ordem das
+      operações é importante
+    - As rotações são realizadas assumindo um eixos fixo do mundo,
+      e não local ao objeto
+    - Para usarmos os ângulos de Euler, devemos escolher uma das 12
+      representações
+    - A melhor sequência depende do que pretendemos fazer
+
+    - A intuiçõa de usarmos ângulos de Euler vem de que todos os
+      corpos 3D têm um referencial próprio para o objeto
+        - Eixo longitudinal (yaw)
+        - Eixo vertical     (roll)
+        - Eixo lateral      (pitch)
+
+* "Gimbal lock"
+    - Um problema dos ângulos de Euler é chamado de "gimbal lock"
+    - Ao longo de várias rotações, é possível que dois dos eixos
+      se alinhem, resultando em uma perda temporária de graus
+      de liberdade.
+
+    - Ex: transformação X-Y-Z, com β=π/2
+
+* Representação matricial
+    - Forma eficiente de aplicar rotações à objetos geométricos
+    - Amplamente utilizada nos pipelines gráficos e GPUs
+    - Por quê utilizamos sempre matrizes?
+        - GPUs otimizadas para fazer estas contas

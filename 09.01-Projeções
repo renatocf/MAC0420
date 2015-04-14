@@ -1,0 +1,244 @@
+Projeções
+==========
+
+* Trackball: mouse "invertido" (com bolinha para cima - permite deslizar
+  durante algum tempo)
+
+* Um trackball a partir do mouse
+
+    - Problema: queremos objetr o mesmo comportamento de um mouse comum
+    - Emular um trackball ideal (sem fricção) usando o mouse
+
+    - Resolvemos em dois passos:
+        - Mapeamos a psição do trackball para a posição do mouse.
+        - Usamos observadores de eventos para gerenciar cada modo
+          de operação.
+
+                                ^ y
+                                |
+                                |
+                           _____|______________
+                          /   ..|.            /
+                         / .´   |  `.        /
+                        / ´     |*++++++++++/++ (x,y,z)
+                       / ´      |:_____.___/___> x
+                      / .      / :    .´  /
+                     /  `     /  :   .´  /
+                    /    '   /   *+.´+++++ (x,0,z)
+                   /      `./... .´    /
+                  /_______ /__________/
+                          / 
+                       z \/
+
+        - Usamos a trackball para fazer mudanças na visualização
+          da câmera. O trackball virtual, geralmente com o tamanho
+          do viewport, permite que mudemos a rotação usando
+          quarténions.
+
+        - Para criarmos os quarténions, precisamos do VETOR NORMAL
+          ao plano entre (x,y,z) e (x,0,z)
+
+* Usando quarténios
+    - A Silicon Graphics já usou quarténios para representar esta
+      modalidade desde 1980.
+
+* Vertex shader
+    attribute vec4 vPosition;
+    attribute vec4 vColor;
+    varying vec4 fColor;
+    uniform vec4 rquat; // rotation quartenion
+
+    // quartenion multiplication
+    vec4 multq(vec4 a, vec4 b)
+    {
+        return vec4(a.x*b.x - dot);
+    }
+
+    vec4 invq(vec4 a) {
+        return vec4(a.x, -a.yzw) / dot(a,a));
+    }
+
+    void main() {
+        vec4 r, p;
+
+        // input point quartenion
+        p = vec4(0.0, vPosition.xyz);
+        // rotate point quartenion
+        p = multq(rquat, multq(p, invq(rquat)));
+        
+        gl_Position = vec4(p.yzw, 1.0);
+        fColor = vColor;
+    }
+
+* Introdução
+    - A visualização de uma cena requer a presença de três elementos
+      básicos:
+      - objetos
+      - câmera (observador)
+      - plano de projeção
+      - raios projetores (linhas de visada)
+    - Visualizações clássicas são baseadas em relationamentos entre
+      estes elementos.
+    - Assume-se que estes objetos são construiídos de forma planar.
+
+* Projeções planares
+    - Projetam em um plano
+    - Raios projetores são retas que:
+        - Convergem em um centro de projeção (perspectiva)
+        - Ou são paralelos.
+    - Tais projeções preservam retas.
+        - Não necessariamente ângulos.
+    - Prokeções são planares são utilizadas em aplicações como a
+      construção de mapas.
+
+* Clássica vs CG
+    - Visualização clássica
+        - Técnicas específicas para cada tipo de projeção.
+        - Diversidade de projeções.
+        - Dependência no relacionamento entre objeto, observador e plano
+          de projeção.
+    - Computação gráfica
+        - Projeção paralela e perspectiva.
+        - Um único pipeline de visualização.
+        - Independência de especificações.
+
+* Taxonomia das projeções
+                      projeções geométridas planares
+                                     |
+                     .---------------'-------------.
+                     |                             |
+                 paralela                     perspectiva
+                     |                             |
+          .----------|---------.           .-------.-------.
+          |          |         |           |       |       |
+    ortográfica axonométrica oblíqua   1 ponto 2 pontos 3 pontos
+                     |
+          .----------|---------.
+          |          |         |
+      isométrica dimétrica trimétrica
+
+* Projeção ortográfica múltipla
+    - Ortográfica - plano de projeção está alinhado nos eixos canônicos
+    - Axonométrica - plano fora dos eixos canônicos
+
+    - Como colocar o plano em qualquer eixo é natural, chamaremos
+      ambas as projeções de "paralelas".
+
+    - Vantagens da projeção ortográfica
+        - Mantém ângulos
+        - Distâncias são proporcionais
+
+* Projeções axonométricas
+    - Isométrica, dimétrica e trimétrica
+    - Cubóides, no canto dos objetos em cada uma das projeções,
+      terão nenhum, 2 ou 3 ângulos iguais (respectivamente).
+
+    - Vantagens e desvantagens
+        - Linhas são preservadas, mas não escalads
+        - Ângulos não são preservados
+        - A projeção de um cídculo em um plano não paralelo
+          torna-se uma elipse
+
+    - Esse tipo de projeção NÃO é natural, mas apresenta características
+      que são úteis para medidas em desenhos técnicos e arquitetônicos.
+
+* Projeção oblíqua
+    - Relacionamento arbitrário entre os projetores e planos de projeção
+
+* Geração de raios
+    - Positionando o plano de visualização
+        - Estabelece 3 vetores para ser a BASE DA CÃMERA: u, v, w
+        - O plano de projeção estão no plano u-v, especivicados
+          por l, r, t, b (cantos do plano). Geralmente, l = -r e
+          b = -t
+    - Gerando raios
+        - for (u,v) in [l,r]x[b,t]
+        - ray.origin = e + u*vu + v*vv
+        - rau .direction = -w
+
+* Geração de raios oblíqua
+    - Plano de projeção é o mesmo
+        - Origem dos raios é idêntica à ortográfica
+        - Direção 'd' difere de -w
+    - Gerando raios
+        - para (u,v), teremos uma direção -d
+
+* História da projeção perspectiva
+    - Tempos antigos: Gregos falaram sobre as leis da pespectiva
+    - Renascença: pespectiva é adotada por artistas
+
+* Projeção perspectiva
+    - Projetores convergem no centro de projeção
+    - Caracterizado pela diminuição de tamanho
+
+* Pontos de fuga
+    - Linhas não paralelas ao plano de projeção partem do objeto
+      e convergem para algum ponto no infinito
+    - Existem projeções com 1, 2 ou 3 pontos de fuga
+    - Cada perspectiva será construída em cada forma
+
+* Vantagens e desvantagens
+    - Objeto distante do observador são pejetados em escala menor que
+      objetos perto do observador.
+    - Distâncias não são preservadas
+    - Ãngulos só são preservados em planos paralelos aos eixos.
+
+* Projeção perspectiva
+    - Perspectiva é a projeção de linhas sobre um ponto
+    - Maginitude determinada por:
+        - Tamanho da imagen
+        - Profundidade do objeto
+        - Distância do plano da imagem
+    - FOV: alpha = 2*atan(h/2d)
+    - y' = dy/z
+
+                                 /|
+                                / |
+                               /  | h
+                              / a |
+                             _)___|
+                             \
+                              \
+                               \
+                                \
+
+* Projeção perspectiva oblíqua
+    - Perspectiva, mas com projeção do plano não perpendicular à
+      direção de visualização
+
+                                 /|
+                                / |
+                               /  | h
+                              /.a |
+                             / )  |
+                             \`.  |
+                              \ `.|
+                               \  `
+                                \
+
+* Geração de raios
+    - Posicionamento do regângulo de visualização
+
+                                        ^
+                                     ..´
+                                    .|`.
+                                  .´ |  `.
+                          ^ v   .´   |    `.
+                          |   .´     \      `.
+                          | .´        \       `.
+                         o|´_____> u   \       |
+                        .´ ._           \      |
+                      .´     `-.         \     |
+                     w          `-.       \    |
+                                   `-      \   |
+                                      `-    \  |
+                                        `-.  \ |
+                                           `- \|
+
+* Field of View (FOV)
+
+* Por que perspectiva oblíqua?
+    - Controla convergência de linhas paralelas
+    - Exemplo padrão: arquitetura
+        - Prédios ão mais altos, então olha-se para cima
+        - Essa projeção corrige as distorções em uma das dimensões
