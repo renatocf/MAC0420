@@ -1,0 +1,200 @@
+Projeções
+==========
+
+* Visualização
+    - Abordagem inversa
+        - Começa com pixels da image
+        - Construa explicitamente raios para cada pixel
+        - Interrogue as partes da cena que projetam em cada pixel
+    - Abordagem direta
+        - Comece com o objeto em 3D
+        - 
+
+* Projeções no OpenGL
+    - No início
+        - Pipeline fixo
+        - Transformações Model-View e Projection
+            - glMatrixMode(gl_MODELVIEW);
+            - glMatrixMode(gl_PROJECTION);
+        - Referências bem definidas: objeto, modelo, câmera, recorte,
+          janela
+    - Após versão 3.0 (ES 2.0)
+        - Pipeline programável
+        - Sem trasormações pré-definidas
+    - MV.js reintroduz algumas das funções existentes
+
+* Projeções em CG
+    - Três apspectos que temos de levar em conta, implementados no
+      pipeline
+    - Posicionamento da câmera
+        - manipulação da matrix model-view
+    - Escolha da lente
+        - manipulação da matriz de prokeção
+    - Recorte (clipping)
+        - Seleção do volume de visualização
+
+* Projeção default
+    - A projeção 'default' é a ortogonal
+
+                         .____________________
+                         |\                    \
+                         | \                    \
+                   near  \  \____________________\  far
+                          \  |                   |
+                           \ |                   |
+                            \|___________________|
+
+* Movendo a câmera
+    - Para visualizar objetos com valores positivos e negativos de z
+    - Movemos a câmera para o lado positivo de 'z'
+        - Translação do referencial da câmera
+    - Movemos os objetos para o lado negativo de 'z'
+        - Translação do referencial do mundo
+
+    - Podemos mover a câmera para qualquer posiçaõ utilizando uma
+      sequẽncia de rotaçẽos e translações
+        - Exemplo: visão lateral
+            - Rotacione a câmera
+            - Distancie-se da origem
+            - Matriz model-view: C = TR
+                - Essas rotações podem ser feitas usando os quarténions
+        
+        - Podemos fazer o "instanciamento" de múltiplos objetos
+          realizando transformações de MODELO antes das rotações
+
+* Função lookAt()
+    - Podemos definir a real posição da câmera (fora dos eixos da origem
+      do mundo) construindo um ponto para o OLHO e tendo um vetor para
+      indicar a posição em que vamos olhar (AT) e onde é o lado de cima
+      da câmera (UP). Com eles, achamos o terceiro vetor e construir o
+      sistema de coordenadas da câmera.
+        - O vetor UP pode nem sempre ser ortonormal. Fazemos um primeiro
+          produto vetorial para acharmos o "lado" (perpendicular ao
+          plano de UP e AT). Por fim, fazemos um segundo produto
+          vetorial, que gera o vetor UP real.
+        - Essa matriz será uma nova BASE, e podemos colocar todos os
+          objetos com relação a essa base.
+        - Se multiplicarmos os objetos do mundo pela inversa da base
+          formada pelos vetores da câmera, teremos o objeto com relação
+          às coordenadas da câmera.
+
+* Pipeline de transformações
+    - Nossas transformações terão vários passos
+        - Espaço dos objetos
+            ↓ transformação do modelo
+        - Espeço do mundo
+            ↓ transformação da câmera
+        - Espaço da câmera
+            ↓ transformação de projeção
+        - Volume de visuação canônica
+            ↓ transformação para viewport
+        - Espaço do viewport
+
+* Projeção paralela: ortográfica
+    - Para implementar a projeção, precisamos apenas ZERAR o eixo z
+
+        [x'] = [x] = [1 0 0 0][x]
+        [y']   [y]   [0 1 0 0][y]
+        [ 1]   [1]   [0 0 0 0][z]
+                     [0 0 0 1][1]
+
+    - O volume de visualização terá tamanho INFINITO
+
+    - Primeira generalização: volume canônico
+        - Todos os objetos estão dentro do cubo que vai de -1 até 1
+          em todas as direções
+        - O volume canônico será transformado em pixels usando um
+          mapeamento de (-0.5, -0.5) até (n_x-0.5, n_y-0.5)
+
+    - Em 3D, mantemos o eixo Z em FRAGMENTOS para que possamos, ao
+      final da pipeline, excluir pixels que ficam fora
+
+    - Segunda generalização: volume qualquer
+        - Definimos um volume qualquer para exibir, que está entre os
+          planos NEAR e FAR, usando as coordenadas 'left', 'right',
+          'bottom', 'top', 'near' e 'front' (por vetores (l,b,n) e
+          (r,t,f).
+        - Esse cubo, então, é levado para volume canônico
+
+    - Transformação ortográfica completa
+        p_w = Mvp * Morth * Mcam *Mm * po
+
+        - po:           coordenadas locais do objeto
+
+        - Mm:           matriz de modelo (para transformar objetos
+                        nas coordenadas do mundo)
+
+        - Mcam = Fc^-1: transforma para coordenadas do olho
+
+                                    [u v w e]^-1
+                                    [0 0 0 1]
+
+                        - como esta matriz é de ROTAÇÃO, basta que
+                          peguemos a transposta dela (para ser inversa)
+
+        - Morth:        matriz de projeção ortográfica
+
+        - Mvp:          matriz de viewport
+
+* Projeção perspectiva
+    - Equações de perspectiva:
+        - Usamos relações de proporção para colocar um PONTO qualquer
+          sobre o plano de projeção, reescalando as proporções de x
+          e y de acordo com sua distância em z projetada no plano
+          de projeção z = d.
+
+                    x_p/d = x/z → x_p = x/(z/d)
+                    y_p/d = y/z → y_p = y/(z/d)
+                    z_p = d
+
+    - Matriz de prokeção perspectiva
+
+    - Coordenadas homogêneas
+        - Podemos usar a 4ª coordenada da matriz em coordenadas
+          homogêneas (valor w) para mantermos a proporção 'z/d'.
+          No final do pipe, para colorir os pixels, o pipe pega
+          o valor de 'w' de cada ponto e dividindo 'x', 'y' e
+          'z' por estes valores.
+        - Precisaríamos, ainda, usar planos 'near' e 'far' para
+          definirmos uma "pirâmide de visualização".
+        - Em vez de "projetar em perspectiva", o OpenGL realiza uma 
+          distorção (cisalhamento) do objeto, levando-o para o volume
+          canônico e projetando de forma ortogonal.
+
+        - Para fazermos a projeção, multiplicamos por uma matriz P
+          do tipo:
+
+                         [1  0  0  0][x] = [   x  ]
+                         [0  1  0  0][y]   [   y  ]
+                         [0  0  α  β][z]   [αz + β]
+                         [0  0 -1  0][1]   [   z  ]
+
+          com α = (near+far)/(near-far) e β = 2*(far-near)/(near-far)
+
+          Dessa maneira, colocamos a superfície dentro de um volume
+          canônico. Este passo é necessário, porque o OpenGL só consegue
+          recortar em pixels dentro desse cubo canônico.
+
+    - Transformação perspectiva completa
+        p_w = Mvp * Morth * P * Mcam *Mm * po
+
+        - po:           coordenadas locais do objeto
+
+        - Mm:           matriz de modelo (para transformar objetos
+                        nas coordenadas do mundo)
+
+        - P:            matriz de perspectiva (que realiza as
+                        distorções para levar o objeto ao espaço
+                        trifimensional)
+
+        - Mcam = Fc^-1: transforma para coordenadas do olho
+
+                                    [u v w e]^-1
+                                    [0 0 0 1]
+
+                        - como esta matriz é de ROTAÇÃO, basta que
+                          peguemos a transposta dela (para ser inversa)
+
+        - Morth:        matriz de projeção ortográfica
+
+        - Mvp:          matriz de viewport
