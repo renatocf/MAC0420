@@ -1,0 +1,230 @@
+Rasterização
+=============
+
+* Pipeline
+                    ||
+                 Aplicação          <-- aplicações
+                    ||
+            | Command stream |
+                    ||
+        Processamento de vértices   <-- transformações 3D, shading
+                    ||
+          | Transformed geometry |
+                    ||
+                Rasterização        <-- conversão de primitivas para
+                    ||                  pixels
+                    ||
+              | Fragmentos |
+                    ||
+        Processamento de fragmentos <-- blending
+                    ||
+          | Imagem do framebuffer |
+                    ||
+                  Display
+                    ||
+                    \/
+
+* Primitivas
+    - Pontos
+    - Segmentos de linhas
+    - Triângulos
+    - Curvas? Podem ser aproximadas com cadeias de segmentos de linhas
+    - Polígonos? Quebra em triângulos
+    - Regiões curvas? Aproximadas com triângulos
+
+    - Objetos mais complexos são feitos de primitivas
+
+* Rasterização ("scan conversion")
+    - Determina quias pixels que pertencem à primitiva especificada por
+      meio de vértices.
+    - Produz um conjunto de fragmentos.
+
+    - Fragmentos possuem uma posição e outros atributos como cor e
+      coordenadas de textura que são interpolados entre os vértiecs.
+    - Cores finais são determinadas usando cor, textura e outras
+      propriedades dos vértices.
+
+* Rasterização
+    - Objetivo primário enumerar os pixels cobertos por uma primitiva
+        - simples, definição apelidada: pixels cujo centro ficam
+          dentro da figura
+    - Objetivo secundário: interpola valores entre as primitivas
+        - e.g. cores computadas nos vértices
+        - e.g. normais nos vértices
+
+* rasterização de retas
+    - Define a linha como um retângulo
+    - Especidicada pelo ponto inicial e final
+    - Imagem ideal: preto dentro, branco fora
+
+        .---.---.---.---.---.---.---.---.---.---.---.
+        |   |   |   |   |   |#/#|   |   |   |   |   |
+        |---|---|---|---|---|/--|---|---|---|---|---|
+        |   |   |   |   |###/   |   |   |   |   |   |
+        |---|---|---|---|--/|---|---|---|---|---|---|
+        |   |   |   |   |#/#|   |   |   |   |   |   |
+        |---|---|---|---|/--|---|---|---|---|---|---|
+        |   |   |   |###/   |   |   |   |   |   |   |
+        |---|---|---|--/|---|---|---|---|---|---|---|
+        |   |   |   |#/#|   |   |   |   |   |   |   |
+        |---|---|---|/--|---|---|---|---|---|---|---|
+        |   |   |   /###|   |   |   |   |   |   |   |
+        |---|---|--/|---|---|---|---|---|---|---|---|
+        |   |   |#/#|   |   |   |   |   |   |   |   |
+        |---|---|/--|---|---|---|---|---|---|---|---|
+        |   |   /###|   |   |   |   |   |   |   |   |
+        |---|--/|---|---|---|---|---|---|---|---|---|
+        |   |#/#|   |   |   |   |   |   |   |   |   |
+        |---|/--|---|---|---|---|---|---|---|---|---|
+        |   /###|   |   |   |   |   |   |   |   |   |
+        |---|---|---|---|---|---|---|---|---|---|---|
+        |   |   |   |   |   |   |   |   |   |   |   |
+        '---'---'---'---'---'---'---'---'---'---'---'
+
+    - Bresenham (Ponto médio)
+        - Faz uma amostragem da largura com retângulos para manter
+          a reque com apenas uma unidade
+        - Define a largura da reta no grid de pixels
+        - Isto é, torna os pixels mais próximos em cada coluna
+        - Note que linhas com 45º são mais finas
+
+* Desenhando a partir de uma reta
+
+    - Função Básica i
+        - Utilizamos a função implítica, com valores 'm' (coeficiente
+          angular) e 'b' (coeficiente linear) da reta.
+        - Problemas: contas de multiplicação (custosas).
+
+    - Função Básica ii
+        - Utilizamos a equação paramétrica da reta, com a variação de
+          'x' e 'y'. 
+        - Problemas: o parâmetro 't' da equação precisa ser discretizado
+          (não ficar apenas entre 0 e 1). Porém, isso não é trivial.
+
+    - Algoritmo DDA
+        - Em vez da equação implícita ou paramétrica completa, apenas
+          adicionames um incremento 'm' (Δy/Δx) a cada valor de 'y',
+          enquanto acrescentamos os 'x'.
+        - Problemas: ainda exige um float e um arredondamento
+                     problemas para ângulos maiores que 45º
+        - Solução: todos os algoritmo têm dificuldade de representar
+          retas com ângulos maiores que 45º (m > 1). Para eles, em vez
+          de percorrermos pelo eixo 'x' e incrementar 'y', percorremos
+          por 'y' e acrestentamos em 'x' (quando m > 1).
+
+    - Resumo dos problemas
+        - Iniciação das linhas
+        - Desempenho
+            - Número de operações
+            - Operações com números reias x inteiros
+            - Multiplicações x adições
+
+    - Algortimo de Bressenham
+        - Que critério podemos usar para escolher entre dois pixels
+          próximos? Utilizamos o ERRO entre o ponto e a reta,
+          minimizando-os sempre.
+        - Chamamos de 'e_k' o erro do último pixel desenhadoo (x_k,y_k)
+        - Algoritmo
+            - Estima-se o novo erro (e_k+1) caso a escolha seja o
+              pixel E(y_k+1 = y_k), com e_{k+1} = e_k + m
+            - Se e_{k+1} > 0.5, significa que deveríamos escolher
+              NE(y_{k+1} = y_k + 1)
+                - Neste caso, o valor correto para e_{k+1} é
+        - Problemas: por usarmos 0.5 como referência (no erro inicial,
+          usado como -0.5)
+        - Solução: multiplicar TODOS os valores por 2*Δx, o que faz
+          com que todas as comparações sejam em inteiros (e, até as
+          multiplicações, possam ser feitas com shifts).
+
+        - Observação: para sabermos se devemos incrementar ou
+          decrementar os erros, precisamos verificar em qual octante
+          estamos. Fazemos isso por meio de if's, para aumentar a
+          eficiência.
+
+* Aliasing
+    - "Padrões" surgidos na criação de retas, por ruído na amostragem
+      de pixels dos algoritmos.
+
+* Antiserrilhamento
+    - Colorir múltiplos pixels para cada x dependendo da área de
+      cobertura da reta ideal.
+    - Antiserrilhamento (ou anti-aliasing) é necessária não apenas
+      para as retas, mas também para polígonos e texturas.
+
+* Rasterização de triângulos
+    - Entrada
+        - três pontos 2D (vértices no espaço de pixels)
+        - Valores de parâmetros para cada vértices
+    - Saída
+        - a coordenada inteira o pixel
+        - parâmetros interpolados para os valores q0, ..., qn
+
+    - Sumário
+        1. Avalização da funções linear no grid de pixels.
+        2. Funções definidas por parâmetros nos vértices.
+        3. Usando parâmetros extras para determinar o conjunto de
+           fragmentos.
+
+        .---.---.---.---.---.---.---.---.---.---.---.
+        |   |   |   |   |   |   |   |   |   |   |   |
+        #################################---|---|---|
+        #   |   |   |   |   /`. |   |   #   |   |   |
+        #---|---|---|---|--/|--`.---|---#---|---|---|
+        #   |   |   |   | /#|###|`. |   #   |   |   |
+        #---|---|---|---|/--|---|--`.---#---|---|---|
+        #   |   |   |   /###|###|###|.  #   |   |   |
+        #---|---|---|--/|---|---|--.´---#---|---|---|
+        #   |   |   | /#|###|###|.´ |   #   |   |   |
+        #---|---|---|/--|---|--.´---|---#---|---|---|
+        #   |   |   /###|###|.´ |   |   #   |   |   |
+        #---|---|--/|---|--.´---|---|---#---|---|---|
+        #   |   | /#|###|.´ |   |   |   #   |   |   |
+        #---|---|/--|--.´---|---|---|---#---|---|---|
+        #   |   /###|.´ |   |   |   |   #   |   |   |
+        #---|--/|--.´---|---|---|---|---#---|---|---|
+        #   | /#|.´ |   |   |   |   |   #   |   |   |
+        #---|/-.´---|---|---|---|---|---#---|---|---|
+        #   /.´ |   |   |   |   |   |   #   |   |   |
+        #--.´---|---|---|---|---|---|---#---|---|---|
+        #   |   |   |   |   |   |   |   #   |   |   |
+        #################################---'---'---'
+
+* Rasterização de triângulos
+    
+    - Para os triângulos, podemos usar COORDENADAS BARICÊNTRICAS
+      para representar qualquer ponto que pertença ao triângulo
+
+                        p = αx + βy + cz
+                        α, β, γ ∈ [0,1]  (α = 1 - β - γ)
+              
+    - Como os pontos só estarão no triângulo se α, β e γ estiverem no
+      intervalo [0,1], podemos testar exaustivamente se um dado ponto
+      está dentro do triângulo.
+    - Para não percorrermos o espaço inteiro, podemos nos limitar
+      ao quadrado em torno do triângulo.
+
+    - Esse método não funciona APENAS para coordenadas. Podemos usar
+      os valores α, β e γ para determinar os valores dos ATRIBUTOS
+      dos vértices (cores RGBA, normais, texturas, etc.).
+
+    - Para calcularmos α, β e γ, podemos usar o método de Cramer
+      para achar β e γ a partir dos vetores.
+
+    - Otimizações
+        - Podemos calcular β e γ usando "curvas de nível" a partir
+          de uma reta. Em vez de contas de matrizes com Cramer,
+          reduzimos as contas para uma divisão.
+        - Porém, para simplificar mais ainda, podemos usar áreas de
+          triângulos, nos aproveitando que as áreas do triânculo
+          entre a reta x-y e o ponto são preservados sobre a reta
+          paralela a este x-y. As áreas são feitas usando três
+          triângulos, com áreas de cada subtriângulo comparada ao
+          do triângulo principal. Todas as áreas são calculadas
+          por meio de produto vetorial.
+        - Para triângulos grandes (como o do desenho), podemos dividí-lo
+          em duas partes usando uma reta paralela ao eixo y. Os
+          algotimos podem ser otimizados, então, para triângulos
+          "para cima" e "para baixo".
+        - Conseguimos, então, traçar as retas usando Brassenham,
+          e cada vez que o eixo 'y' muda, pintamos toda a linha
+          entre os pixels.
