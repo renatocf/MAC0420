@@ -1,0 +1,106 @@
+Mapeamento de texturas
+=======================
+
+* Mapear texturas é o mesmo que criar uma função de uma imagem para a
+  coloração de um objeto.
+
+* O mapeamento esférico é um dos tipos de mapeamento. Ele será feito 
+  considerando a posição de lookup ("raio refletido" do raio de visão
+  e a normal da superfície).
+
+* Formas de captura de textura
+    - Fotografias panorâmicas, a serem mapeadas em um cubo
+    - 'Light probes', que são esferas muito reflexivas, e conseguem
+      fazer o mapeamento esférico do ambiente para ser usado em
+      esferas depois.
+
+* Formas de mapeamento da textura
+    - Esférica: a textura é feita em torno da esfera (possivelmente
+      com um ligth probe) e mapeá-las no modelo.
+    - Cúbica: a textura é feita em torno de 6 faces do cubo, e os
+      pontos xyz do modelo acabam mapeados com o ambiente sobre ele.
+
+        - Ao formar um cubo do tamanho aproximado do volume de
+          visualização, criamos um 'skybox', que simula o ambiente.
+          Esse ambiente, porém, pode precisar ser deslocado (de
+          acordo com a posição) para aumentar o realismo.
+
+* Bump mapping (rugosidade)
+    - A rugosidade pode ser simulada por meio de imagens de funções.
+      Podemos simular a microgeometria do objeto gerando novos
+      fragmentos com posição deslocada. A normal desse fragmento
+      criado é, então, o original. 
+
+                    Q(u,v) = P(u,v) +  I(u,v)  *  n(u,v)
+                    ^^^^^^   ^^^^^^    ^^^^^^     ^^^^^^
+                    Novo    Posição   Função da   Normal
+                  fragmento original   textura   original
+
+    - A modificação para criar o novo fragmento é como se fizéssemos
+      um deslocamento do original, e com ele criamos as cores.
+
+* Displacement mapping
+    - Baseado na técnica anterior, em vez de usarmos a geometria
+      original no mapeamento, podemos usar os fragmentos modificados
+      para renderizar o objeto. Desse modo, obtemos a microgeometria
+      de forma mais realista.
+
+    - A nova equação para gerar os fragmentos é:
+
+                    P(u,v) = P(u,v) +  I(u,v)  *  n(u,v)
+                    ^^^^^^   ^^^^^^    ^^^^^^     ^^^^^^
+                     Nova   Posição   Função da   Normal
+                    posição original   textura   original
+
+* Normal mapping
+    - Podemos usar uma ferramenta de mapeamentos 3D (como o Kinect)
+      para gerar uma nuvem de pontos. As malhas de triângulos
+      geradas são muito grandes, e custosas para ser processadas no
+      pipe do OpenGL. Por isso, é possível simplificar o objeto e,
+      então, usar as normais do objeto original (com muitos triângulos)
+      para criar o efeito visual do original sobre o objeto mais
+      simples.
+
+* Texturas tridimensionais
+    - São funções I(u,v,w)
+    - Precisam de uma forma de coletar os dados em 3D (como um scanner
+      médico, que faz imagens em "camadas" de um objeto).
+
+* Mapeamento da textura
+    - É baseada em coordenadas paramétricas
+    - Para saber onde a textura será posicionada, precisamos passar
+      para o OpenGL os pontos da imagem que correspondem aos vértices
+      dos triângulos. As posições são rasterizadas, e as posições
+      no gráfico são descobertas de acordo com isso.
+    - Como as imagens mapeadas podem ser menores que o objeto, há
+      duas opções distintas para fazer o mapeamento: ou fazer
+      um 'wrapping' (posiçõe são circulares em torno da imagem)
+      ou um clampping (usa a última posição para determinar qual
+      será o valor).
+
+* MIP Mapping
+    - Permite que texturas de diferentes níveis de resolução sejam
+      aplicadas de forma adaptativa.
+    - Reduz aliasing devido a problemas de interpolação.
+    - O nível da textura na hierarquia mipmap é especificada durante
+      a definição da textura.
+    - Todas as operações são feitas a nível de fragmento.
+
+    - Os MIP Mappings são construídos dividindo um quadrado em 4 partes:
+      3 são feitas com canais RGB da imagem, e o 4º é utilizado para
+      repetir o processo, com metade do tamanho. Esse processo é
+      repetido até restar apenas 1 pixel.
+
+* Distorções
+    - Distorções são feitas com duas passadas no pipe. Primero, gera-se
+      a imagem normalmente. Ela, porém, não é renderizada. Na próxima
+      passada, ela é usada como uma TEXTURA, associada a um PLANO 2D.
+      Nahora de aplicar essa textura, faz-se a deformação.
+    - Esse tipo de distorção é útil para simular diferenças entre
+      lentes numa câmera.
+
+* Aplicando texturas
+    - Texturas são aplicadas an execução de um fragment shader,
+      utilizando um 'sampler'.
+    - 'Samplers' retornam a cor da textura a partir de um 'texture
+      object'.
