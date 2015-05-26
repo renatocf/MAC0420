@@ -1,0 +1,196 @@
+Curvas
+=======
+
+* Curvas de Hermite
+    - Vimos que as curvas de Hermite permitem que mantenhamos,
+      definindo tangentes, a suavidade dos segmentos de curva em
+      seus extremos.
+    - Entretanto, as curvas não são interessantes, pois é complicado
+      definir as tangentes (elas precisariam ser passadas por meio de
+      seus valores DIGITADOS, não por seus pontos).
+    - Seria interessante poder definir as tangentes apenas por pontos.
+
+* Curvas de Bézier
+    - As curvas de Bézier foram inventadas para auxiliar no design de
+      automáveis (ao algoritmo "de Casteljau").
+    - O algoritmo de De Casteljau baseia-se em uma sequẽcia de passos de
+      transformação geométrica de fácil implementação.
+    - Por meio desta transformação, é possível deduzir uma série de
+      propriedades a partir das curvas que ela gera.
+
+    - Algoritmo de De Casteljau
+        - Transformação de 3 pontos para obtenção de uma parábola
+            - Escolha três ontos: P0, P1 e P2
+            - Escolha um valor de t entre 0 e 1, ex: t = 0.3
+            - Localize o ponto A que está a uma fração 't' alo longo da
+              linha de P0 e P1. Analogamente, lozalize B a mesma fração
+              't' entre os pontos P1 e P2.
+            - Os novos ponos serão:
+                - A(t) = (1-t)P0 + tP1
+                - B(t) = (1-t)P1 + tP2
+            - Agora, repita a interpolaão linear nestes pontos (usando o
+              mesmo valor de 't').
+            - Ache o ponto, P(t), que está na fração 't' do caminho
+              entre A e B: P(t) = (1-t)A + tB.
+            - Se este processo for repetido para todo 't' entre 0 e 1, a
+              curva P(t) será gerada.
+            - A foram paramétrica da curva resultante para tal curva
+              será P(t) = (1-t)²P0 + 2t(1-t)P1 + t²P2.
+            - A forma paramétrica para P(t) é quadrátiva em 't', então
+              concluímos que tal curva é uma parábola.
+            - Ela contiuará sendo uam parábola mesmo quando 't' variar
+              entre -∞ até +∞.
+            - Ela passará em P0 quanto t = 0 e em P2 quando t = 1.
+            - Assim, obtemos um processo bem definido que gera uma curva
+              parabólica suave baseada em três pontos de controle.
+
+    - As curvas de Bézier cúbicas funcionam de uma maneira muito
+      simular. Temos, porém, 4 pontos de controle e 3 semirretas.
+      Dado um 't' qualquer, repetimos o processo de interpolar
+      achando 't' nas semirretas principais, depois nas semirretas
+      geradas pelos pontos achados nela, até restar apenas 1 ponto.
+        - A curva Bézier baseada em quatro pontos de controle possui
+          forma paramétrica:
+            P(t) = P0(1-t)³ + P1*3(1-t)²t + P2(1-t)t² + P3t³.
+        - Cada ponto de controle Pi é pesado por um polinômio
+          cúblico, e os termos são somados.
+        - Estes termos são chamados de 'polinômios de Bernstein':
+            B_0^3 = (1-t)³
+            B_1^3 = 3*(1-t)²t
+            B_2^3 = 3*(1-t)t²
+            B_3^3 = t³
+
+        - Ponderação com Bernstein
+            - De forma equivalente, podemos considerar um ponto P(t)
+              para dado valor 't' como a soma dos vetores da origem
+              até os pontos P0 a P3, tendo como função de ponderação
+              os polinômios de Bernstein.
+
+    - Generalização das curvas de Bézier
+        - Por meio dos polinômios de Bernstein, foi possível
+          generalizar a forma dos polinômios de Bézier:
+
+            B_k^L(t) = (L k)*(1-t)^L-k*t^k
+
+            P(t) = ∑^L_{k=0}*P_k*B^L_k(t)
+
+            (L k) = L!/(k!*(L-k)!)
+
+    - Características das curvas Bézier
+        - Interpolação dos pontos finais: a curva bézier P(t)
+          baseada nos pontos de controle P0, P1, ..., PL sempre
+          interpola os pontos P0 e PL.
+        - Invariância afim: para aplicar uma transformação afim T em
+          todos os pontos P(t) da curva, transformamos os pontos de
+          controle uma vez, e usamos os novos pontos para recriar a
+          curva transformada Q(t) em qualquer t.
+
+            Q(t) = T(∑^L_{k=0}*P_k*B^L_k(t))
+                 = ∑^L_{k=0}*T(P_k)*B^L_k(t)
+
+        - Uma curva Bézier P(t) nunca deixa seu fecho convexo, que é
+          definido pela região entre os 4 pontos de controle.
+
+    - Desenho de curvas Bézier
+        - Curva normalmente é aproximada por uma linha poligornal
+        - Pontos podem ser obtivos avaliado a curva em t = t1, t2,
+          ..., tk
+            - Avaliar so polinômios de Bernstein
+            - Usar o algoritmo recursive de De Casteljau
+        - Qualtos pontos?
+            - Mais pontos em regiões de alta curvatura
+        - Ideia: subdividir recursivamente a curva em trechos até
+          que cada trecho sera aproximadamente "reto".
+
+    - Emendando curvas de Bézier
+        - Continuidade C0: p3 = q0
+        - Continuidade C1: C0 e segmento p2p3 com mesma direção e
+          comprimero que o segmento q0q1.
+        - Continuidade C2:C1 mais restrições sorbe os pontos p1 e
+          q2.
+
+* Superfícies de Bézier
+    - Precisamos de 16 pontos de controle para gerar uma superfície
+      cúbica, e a superfície bézier precisa de pontos de controle para
+      cada par de pontos.
+
+* Polinômios de Bernstein
+    - A mudança de qualqeur ponto de controle altera a curva inteira.
+    - Cada polinômio de Bernstein é "ativo" (não zero) dentro de todo
+      intervalo [0,1].
+    - O intervalo noqual uma função é não-zero é denominado 'suporte':
+        - Já que cada polinômio de Bernstei possui suporte em todo o
+          intervalo [0,1], e a curva é uma ponderação destas funções,
+          cada pontode controle tem um efeito na curva em todos os
+          valores de t entre 0 e 1.
+    - Assim, o ajuste de qualqeur ponto de controle afeta a curva
+      globalmente, sem oferecer o controle local desejado.
+
+* Curvas longas
+    - Curvas Bézier com L+1 pontos são de grau L
+        - Curvas de grau alto são difíceis de desenhar.
+        - Sujeitas a erros de precisão.
+    - Normalmente, queremos que pontos de controle tenham efeito local.
+    - Em curvas Bézier, todos os pontos de controle têm efeito global.
+    - Solução
+        - Emendar curvas polinomiais de grau baixo.
+        - Relaxar condiçẽos de continuidade.
+
+* Funções de ponderação
+    - Para gerar o suporte local, podemos fazer as curvas só criarem a
+      influência de um ponto em um intervalo entre 0 e 1.
+    - A forma utilizada para cada uma das funções de ponderação R_k(t)
+      são unidas, para formar uma curva, na forma paramétrica das
+      curvas de Bézier:
+        V(t) = ∑^5_{k=1} = P_k*R_k(t)
+
+* Splines
+    - A forma g(t) é um exemplo de uma função 'Spline': uma função
+      polinomial por partes que possui um grau de suavidade suficiente.
+    - Definição: Uma funão spline de grau M é uma função polinomial por
+      partes 
+
+    - propriedades
+        - Possui controle locais, já que o intervalo de suporte para
+          cada função de ponderação tem tamanho 3.
+        - A curva deve inteporlar pontos médios das arestas entre pontos
+          de controle; indicando uma propriedade geométrica.
+        - A curva é 1-suave (C1)
+        - Nenhum ponto de controle é interpolado.
+        - Todos os polinômios possuem grau 2, facilitando a sua
+          estabilidade e simplicidade de cálculo.
+            - O grau dos polinômios não dependem dos pontos de controle.
+        - Funciona para qualquer número de pontos de controle.
+
+* Funções genéricas de ponderação
+    - Precisamos maior controle: a curva deveria entortar mais e ter
+      maior suavidade (>1).
+        - Isso sugere a mudança para polinomiais cúbicas.
+    - Queremos que o usuário possa especificar quais pontos de controle
+      são interpolados.
+    - Também gostaríamos de um único algoritmo que englobasse as
+      técnicas de design descritas até o momento: incluindo as curvas de
+      Bézier.
+    - Precisamos desenvolver famílias mais genéricas de funções de
+      ponderação que reinforcem todas as propriedades discutidas até o
+      momento.
+    - Continuaremos a usar a mesma forma paramétrica baseada em L+1
+      pontos de controel e L+1 funções de ponderação R_0(t),...,R_L(t).
+    - P(t) deve ser um somatório de pontos.
+    - Usaremos polinomiais 'piecewise' ára as funções de ponderação, mas
+      elas agora serão definidas por meio de uma sequncia mais genérica,
+      chamado de VETOR DE NÓS, T = [t0, t1, t2, ...], com ti <= ti+1.
+        - Alguns dos nós podem ter o mesmo valor, mas são identificados
+          de formas distintas.
+
+    - Cada função de ponderação R_k(t) é um polinômio "piecewise" que é
+      zero até o tempo t_k, é não zero em uma certa extensão do vetor de
+      nós, e então retorna a zero novamente.
+    - Cada R_k(t) deve ter uma função spline, assegurando um nível de
+      suavidade 't' dentro de seu suporte.
+
+    - Dado um vetor de nós, existirá uma família de funções de
+      ponderação que permitam gerar quaisquer curvas splines possíveis
+      definidas por aquele vetor de nós.
+    - Tal família é cahamda de 'base' para as splines, o que sifnifica
+      que qualqeur curva spline pode ser alcançada por meio da soma.
