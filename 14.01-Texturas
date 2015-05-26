@@ -1,0 +1,89 @@
+Texturas
+==========
+
+* Mapeamento de ambiente
+    - Mapeamento que simula a aparência altametne especular de certos
+      objetos sem usar técnicas globais de renderização
+        - Comum em filmes e videogames
+
+    - Determinação das faces
+        - Calcula o vetor reflexão
+        - R = 2(N*V)N-V
+        - Usar maior magnitude dos componentes de R para determinar
+          a face do cubo
+        - Outros dois componentes 
+    
+
+* Mapeamentos em OpenGL/WebGL
+    - WebGL suporta mapeamento cúbico, e OpenGL tem cúbico e esférico
+
+    - Podemos formar um mapeamento em um buco definindo 6 texturas 2D
+      que correspondem aos lados de um cubo.
+
+    - O WebGL oferece um 'sampler' do tipo 'cubermap':
+
+        vec4 textColor = textureCube(pirture, coordinates)
+
+    - Devemos assumir que o ambiente está bem longe do objeto.
+    - Objetos não devem ser côncavos (ausência de auto-reflexões).
+    - Sem reflexões entre objetos.
+    - Precisamos de um mapa de reflexão para cada objeto.
+
+* Em WebGL
+    gl.textureMap2D(
+        gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+        level, rows, columns, border, gl.RGBA,
+        gl.UNSIGNED_BYTE, image1
+    );
+
+    - A chamada é semelhante para as outras 5 imagens
+    - Cria-se, então, um 'texture object' para todos.
+
+    - Exemplo
+        - Considere um cubo rotacionando que reflete cores das paredes
+          de um quarto.
+
+* Refração
+    
+    - Podemos simular a refração usando a mesma técnica da reflexão.
+      Em vez de usarmos o ângulo de reflexão para determinarmos o
+      ponto. O ângulo de refração é obtido pela Lei de Snell:
+        
+                        sen (theta1)   n2
+                        ------------ = --
+                        sen (theta2)   n1
+
+                     `.    |    .´
+                       `.  |  .´
+                 theta1 (`.|.´
+            --------------------------------------------
+                           |\) theta2
+                           | \
+
+    - Entretanto, a refração é muito complicacada para se implementar
+      no pipeline, pois ela tem muitos componentes.
+
+    - Para fazer a simulação da existência de refração, podemos usar
+      o canal 'alpha' da cor, que define o grau de OPACIDADE de um
+      certo material.
+
+        - Devemos habilitar e escolher fatores de mistura para origem e
+          destino da cena.
+
+        - Somente um conjunto de fatores é suportado
+            - gl.ZERO, gl.ONE
+            - gl.SRC_ALPHA, SRC_ALPHAgl.ONE_MINUS_SRC_ALPHA
+            - gl.DST_ALPHA, DST_ALPHAgl.ONE_MINUS_DST_ALPHA
+
+        - Exemplo #1
+            - Começamos um um fundo opaco (R,G,B,1.0)
+            - Agora, queremos desenhar um polígono translúcido com a cor
+              (R_1, G_1, B_1, A_1).
+            - Então, precisamos selecionar
+                - GL_SRC_ALPHA e GL_SRC_ONE_MINUS_ALPHA
+            - Assim, conseguimos fazer uma composição entre as cores
+              de dois objetos da cena.
+
+        - Esse processo é chamado de COMPOSIÇÃO, e a composição de cores
+          é complicado. 
+              
