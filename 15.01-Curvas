@@ -1,0 +1,272 @@
+Curvas e superfícies
+=====================
+
+* Representações
+    - Há muitas maneiras de representar curvas e superfícies
+    - Noralmente, queremos que tal representação seja:
+        - Estável numericamente
+        - Suave, sem descuntinuidades e ondulações
+        - Fácil de calcular
+    - Requisitos adicionais
+        = Precisamos que a curva passe pelos pontos de controle?
+        - Precisaremos de suas derivadas? (até que ordem?)
+
+* Tipos de representação
+    - Explícita
+        - Forma mais familiar: y - f(x)
+        - Não é possível representar todas as curvas
+            - Problema com linhas verticais
+            - Círculos (y = sqrt(r²-x²)
+        - Extensão para 3D
+            - y = f(x) z = g(x)
+            - A forma z = f(x,y) define uma superfície (como
+              discretizá-la?)
+
+        - Não é uma representação boa para, de forma geral
+
+    - Implícita
+        - Funções bidimentsionais: g(x,y) = 0
+        - São mais robustas
+            - Retas: ax + by + c = 0
+            - Círculos: x² + y² - r² = 0
+        - A forma 3D g(x,y,z) = 0 define uma superfície
+            - A intersecção entre duas superfícies definem
+              uma curva.
+
+        - Essa representação é boa para TESTAR se um dado
+          ponto pertence a uma superfície, ou se está em algum dos lado
+          do objeto. Entretanto, ele não facilita a geração das
+          superfícies.
+
+    - Paramétrica
+        - Uma equação para cada variável espacial
+            - p_x = x(u)
+            - p_y = y(u)    p(u) = [x(u), y(u), z(u)]^T
+            - p_z = z(u)
+
+        - Superfícies paramétricas
+            - p_x = x(u,v)
+            - p_y = y(u,v)    p(u,v) = [x(u,v), y(u,v), z(umv)]^T
+            - p_z = z(u,v)
+
+        - É a mais útil para gerar pontos dentro da superfície (basta
+          discretizarmos um parâmetro).
+
+    - Comparação
+        - Cada uma das formulações tem vantagens e desvantagens
+        - Para as tarefas que mais usamos, as melhores alternativas são:
+            - Amostragem de pontos: paramétrica
+            - Classificação ponto-conjunto: implícita
+
+* Funções paramétricas
+    - Normalmente, conseguimos selecionar funções "razoáveis"
+    - Pode existir mais de uma para uma certa curva
+    - Não são as únicas para uma certa curva
+    - Podem aproximar ou interpolar pontos de controle
+    - Desejamos as propriedades:
+        - Suavidade
+        - Diferenciabilidade
+        - Facilidade de avaliação
+
+* Normais
+    - Podemos diferenciar em relação aos parâmetros 'u' e 'v' para obter
+      o vetor normal em qualquer ponto 'p'.
+
+    - Como podemos obter a normal em qulaquer ponto, temos resultados
+      MELHORES que discretizando por triângulos.
+
+* Segmentos de curva
+    - Podemos normalizar 'u', de forma que uma curva seja escrita como:
+
+                p(u) = [x(u), y(u), z(u)]^T, 0 <= u <= 1
+
+    - É comum desenharmos uma única curva com suporte global
+
+    - Em CG e CAD, é mais viável desenhar pequenos segmentos de curva
+      que são interconectados.
+
+    - Podemos querer que os pontos de junção gerados tenham suas
+      derivadas, de até uma certa ordem, contínuas.
+
+* Curvas polinomiais paramétricas
+    - x(u) = sum(i=0 to N) c_xi*ui
+    - y(u) = sum(j=0 to N) c_yj*uj
+    - z(u) = sum(k=0 to N) c_xk*uk
+    
+    - Se N = M = L, precisamos determinar 3*(N+1) parâmetros (e termos
+      3*(N+1) pontos para determinarmos os coeficientes desconhecidos).
+
+    - Por que usar polinômios?
+        - Fáceis de calcular
+        - Funções contínuas e diferenciáveis
+        - Porém, devemos nos preocupar com a continuidade nos pontos
+          entre segmentos.
+
+* Curvas polinomiais cúbicas
+    - A atribuição de N = M = L = 3 resulta na facilidade de avaliação e
+      flexibilidade no design
+        
+                      p(u) = ∑(k=0 to 3) c_k*u_k
+
+    - Quatro coeficientes são necessários para definir 'x', 'y' e 'z'
+    - Achar quatro condições indepenentes que resultarão em 4 equações
+      de 4 variáveis, para cada 'x', 'y' e 'z'.
+    - Tais condições são uma mistura de requisitos de continuidade nos
+      pontos de junção.
+
+* Superfícies polinomiais cúbicas
+
+            p(u,v) = ∑(i=0 to 3)∑(j=0 to 3) c_ij*u^i*v^j
+
+    - Precisamos de 48 coeficientes (3 conjuntos independentes de 16
+      coeficientes) para determinar um retalho ("patch") da superfície.
+
+* Moticação: animação da câmera
+    - A trajetória da câmera em uma cena deve ser especificada a cada
+      instante de tempo.
+    - A câmera estará localizada na posição 'P(t)' no tempo 't'.
+
+* Animação
+    - A câmera deve se deslocar na trajetória P(t) de orma suave, sem
+      movimentos bruscos
+        - Isto impõe uma restrição na velocidade P'(t) = v(t)
+    - Outros objetos também poderão se mover na cen: o carro, o barco
+      pessoas saindo da casa, etc.
+        - O movimento destes objetos pode ser descrito pode meio de
+          funções paramétricas.
+
+* Suavidade do movimento
+    - O vetor 'velocidade' (v(t)) é um vetor que descreve a direção da
+      trajetória com relação ao tempo.
+
+    - A direção'normal' à curva também pode ser determinada em cada
+      ponto.
+        - Ela é definida como a direção perpendiular à reta tangencial
+          em cada ponto.
+
+    - Se a reta tangencial possui direção v(t0) no tempo t0, a direção
+      normal em t0 será dada pelo vetor:
+                n(t0) = v _|_(t0) = (-dy/dt, dx/dt)| t=t0
+
+* Formato vetorial
+                      p(u) = ∑(k=0 to 3) c_k*u_k
+
+    - Podemos fazer c = [c0 c1 c2 c3] e u = [u0 u1 u2 u3]
+
+* Primeiro passo: curva interpoladora
+    - Dados quatro pontos (de controle) p0, p1, p2, p3, como podemos
+      determinar a cúbica p(u) que passa por eles?
+
+    - Analisando as condições de interpolação em u = 0, 1/3, 2/3, 1:
+        - Em p0, p0 = p(0) = c0
+        - Em p1, p1 = p(1/3) = c0 + (1/3)*c1 + (1/3)²*c2 + (1/3)³*c2
+        - Em p2, p2 = p(2/3) = c0 + (2/3)*c1 + (2/3)²*c2 + (2/3)³*c2
+        - Em p3, p3 = c0 + c1 + c2 + c3
+
+    - Escrita em forma matricial, teremos:
+
+        p = Ac, A^-1*p = c, com A = [ 1  0    0      0    ]
+                                    [ 1 1/3 (1/3)² (1/3)³ ] 
+                                    [ 1 2/3 (2/3)² (2/3)³ ] 
+                                    [ 1  1    1      1    ] 
+
+    - A matriz A^-1 é a MATRIZ DE INTERPOLAÇÃO.
+
+    - Para interpolarmos múltiplos segmentos, precisamos fazer os mesmos
+      cálculos, usandos novos 4 pontos para o novo segmento.
+
+* Funções de mistura ("blending")
+    - Podemos reescrever a equação de p(u):
+        P(u) = u^T*c = u^T*M_i*p = b(u)^T*p
+
+      com b(u) = [ b_0(u), b_1(u), b_2(u), b_3(u), ]
+
+    - A função b, que funciona como uma 'base', determinará como será a
+      curva a ser gerada.
+
+    - Estas funções, porém, não são suves.
+        - Todos os zeros das funões estõa entre 0 e 1.
+        - Então a interpolação também não será.
+
+* Retalho interpolador
+            p(u,v) = ∑(i=0 to 3)∑(j=0 to 3) c_ij*u^i*v^j
+
+    - Precisamos de 16 condições para determinar os 16 coeficientes.
+    - Escolheremso u,v = 0, 1/3, 2/3, 1
+
+* Outros tipos de curva e superfícies
+    - Como transcender as limitações da forma interpoladora?
+    - Precisamos EXIGIR que as derivadas sejam iguais.
+
+* Curvas de Hermite
+    - Utiliza duas condições interpoladoras e duas confições sobre as
+      derivadas por segmento (as retas representam o valor que as
+      derivadas deverão ter).
+    - Conserva a continuidade e primeira derivada entre segmentos.
+
+    - Equações
+        - As condiçẽos de interpolação permanecem as mesmas nos dois
+          extremos da vurva:
+            P(0) = p0 = c0
+            P(1) = p3 = c0 + 01 + c2 + c3
+
+        - Diferenciando P encontramos P'(u) = c1 + 2uc2 + 3u²c3
+
+        - Avaliando nos pontos extremos:
+            P'(0) = p'0 = c1
+            P'(1) = p'3 = c1 + 2c2 + 3c3²
+
+    - Forma matricial
+        
+        q = [p0] = [1 1 1 1]
+            [p1]   [0 1 1 1]
+            [p2]   [0 1 1 1]
+            [p3]   [0 1 1 1]
+
+    - Polinômios de mistura
+        P(u) = b(u)^T*q
+
+
+        b(u) = [  2u³-3u²+1 ]
+               [  -2u³+3u²  ]
+               [ u³-2u² + u ]
+               [    u³-u²   ]
+
+    - Embora estas fnções sejam suaves, a forma de Hermite não é
+      amplamento utilizada em CG e CAD: normalmente temos pontos de
+      controle, e não derivadas.
+
+    - Ainda assim, a forma de Hermite é a base das curvas Bézier.
+
+* Continuidade paramétrica (C^k)
+    - Dizemos que uma curva P(t) tem 'continuidade paramétrica' de ordem
+      k no intervalor de 't' E[a,b] se todas as derivadas da curva até
+      grau 'k' existem e são contínuas no intervalo [a,b].
+    - Dizemos, então, que P(t) tem suavidade 'k' no intervalo t E[a,b].
+    - Para evitar movimentos abruptos em animações, utilizaremos curvas
+      com suavidade '1'.
+
+* Continuidade geométrica (G^k)
+    - A continuidade G^0 é igual a C^0: P(t) é contínuo em 't' no
+      intervalo [a,b].
+    - Continuidade G^1 em [a,b] implica que P'(t-dt) k*P'(t+dt), para
+      alguma constante 'k' e para todo 'c' no intervalo [a,b].
+
+    - Continuidade G^2 em [a,b] implica que P'(t-td) = k * P1(t+dt)
+      e P'' (t-td) = m * P(2).
+
+* Curvas polinomiais de 3º grau
+    - Funções polinomais maiores que grau 3 não são de fácil conversão
+      para a forma paramétrica.
+    - Polinômios cúbicos, no entento, não são úteis no desennho de
+      novas curvas.
+
+* Design interativo de curvas
+    - Para desenhar, o operador move o ponteiro ao long de uma curva
+      ideal, clicando em um conjunto de pontos de controle p0, p1, ...,
+      próximas à curva ideal.
+
+    - O papel do algoritmo é produzir um ponto P(t) para qualquer valor
+      de 't'. Os dados de entrada são o conjutn ode pontos de controle
+      que determinam a forma da curva P(t).
+
