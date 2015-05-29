@@ -1,0 +1,71 @@
+Superfícies de Subdivisão
+==========================
+
+* As curvas de subdivisão vêm da ideia de criar curvas fazendo
+  interpolações ou cortes entre retas.
+    - Esse procedimento também pode ser aplicado em superfícies 3D.
+
+* Chamamos de superfície ou curva 'limite' uma curva a partir da qual
+  não podemos ver mais diferenças ao fazer subdivisões.
+
+* Em geral, queremos ter poucos pontos de controle - e usar esta malha
+  para fazer transformações (animações). Com elas, então, podemos
+  escolher a granularidade de gerar os objetos.
+
+  - Ex:
+    p2' = 1/2*(1/2*p0 + 1/2*p1) + 1/2*(1/2*p1 + 1/2*p2)
+
+    - Achar o ponto p2' transformado por divisões é o mesmo que pegar
+      a equação da curva de Bézier para uma quadrática com u = 1/2.
+
+        B2(u) = (1-u)²*p0 + 2u*(1-u)*p1 + u²*p2
+
+    - Para toda curva de subdivisão, existirá uma equação paramétrica
+      fechada, no limite, que a representará.
+
+* Chaikem, em 1974, foi um dos primeiros a publicar um método de criar
+  curvas a partir de subdivisões.
+    - Em sua divisão, cada reta tinha 2 pontos de divisão (a 1/4 e 3/4
+      das retas). Esse tipo de subdivisão com dois pontos cria a noção
+      de pontos pares e ímpares, com propriedades interessantes.
+
+
+    - Para gerarmos novos pontos, em geral, damos pesos para os pontos
+      da semirreta que criam os pontos intermediários.
+
+               3/4                              1/4
+                *----------*---------------------*   (par)
+                A                                B
+
+               1/4                              3/4
+                *---------------------*----------*   (ímpar)
+                A                                B
+
+    - Restam, porém, algumas perguntas:
+        - Como dividir a malha?
+        - Como armazenar novos triângulos na malha?
+
+    - Vantagens
+        - Facilidade na criação de geoetrias complexas.
+        - Renderização eficiente.
+        - Facilidade no desenvolvimento de ferramentas de animação.
+
+    - Desvantagens
+        - Encontrar as regras de subdivisão para manter a suavidade
+          (partindo dos polinômios, era claro como as propriedades se
+          mantinham, dadas as funções)
+        - Dificuldade na especificação da precisão desejada para o
+          refinamento
+        - ANálise da suavidade se torna complicada na elaboração de
+          novas metodologias de subdivisão
+        - Ausência de parametrização
+            - Dificuldade de encontrar pontos específicos
+            - Implica dificuldades em mapear coordenadas de textura nas
+              superfícies geradas por estas curvas.
+
+* Esquemas de subdivisão de malhas
+    - Esquema de subdivisão de Quadriláteros (1978, para triângulos)
+
+    - Esquema de subdivisão de Loop (1987, para triângulos)
+        - Subdivide cada triângulo em 4 triângulos quebrando cada
+          lateral e conectando os novos vértices.

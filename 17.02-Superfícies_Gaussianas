@@ -1,0 +1,26 @@
+Superfícies Gaussianas
+=======================
+
+* Assumindo que os vértices obtidos pela subdivisão são
+  representados por Pi:
+
+    - Uma superfície RaG é definida por:
+    
+      P(u,v)  = ∑(i=1,N) Pi*gi(u,v)
+    
+      gi(u,v) =     Gi(u-ui,v-vi)
+                ----------------------
+                ∑(i=1,N) Gi(u-ui,v-vi)
+    
+    - Onde G é uma Gaussiana (com altura unitária) em 2D
+      centralizada em cada ponto de controle.  
+
+* Por termos um parâmetro extra (a variância), temos a flexibilidade de
+  aumentar ou diminuir a influência de um certo ponto de controle (ui,
+  vi).
+
+* Aproximação via RaGs
+    - Já que sabemos os parâmetros de todos os pontos, para cada onto pi
+      podemos determinar o ponto correspondente na superfície P(ui,vi)
+    - Substituímos a tolerância De = max_i{di} por
+      D_t = max_i||P(ui,vi)-Pi||.
