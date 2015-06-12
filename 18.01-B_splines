@@ -1,0 +1,47 @@
+B-splines
+==========
+
+* Recorrência Cox-de Boor
+
+* Propriedades
+    - Dados n+1 pontos (P0...Pn) de controle, ela é composta de (n-d+1)
+      curvas de grau 'd' emendadas com continuidade d-1 nos n+d+1 nós
+      t0, t1, ..., tn+1.
+    - É invariante com relação à transformações afim.
+
+* Vetor padrão de nós
+    - O vetor padrão de nós para um B-spline de ordem m começa e termina
+      com um nó de multiplicidade 'm' e atribui um espaçamento unitáro
+      para os nós restantes.
+    - Se tivermos 8 pontos de controle e utilizarmos B-splines cúbicas
+      (m=4), o vetor padrão será:
+                    T = (0,0,0,0,1,2,3,4,5,5,5,5)
+    - Ao repetirmos com 'd+1' os intervalos laterais, conseguimos fazer
+      com que a curva interpole pelos primeiro e último ponto de
+      controle.
+
+* Parametrização do círculo
+    - Forma implícita: x = ty + t, sujeito à x²+y² = 1
+    - Resolvendo esse sistema chega-se a uma parametrização alternativa
+      do círculo:
+        - x(t) = 2t/(1+t²), y(t) = (1-t²)/(1+t²)
+
+    - Podemos considerar o termo '1+t²' como sendo uma projeção do IR²
+      em um ponto do IR¹.
+    - Podemos representar o círculo, então, por meio de coordenadas
+      homogêneas:
+                            [ 2t, 1-t², 1+t² ]
+
+    - O mesmo vale para o IR³.
+
+* B-spline racional
+    - As B-splines racionais são uma extensão do conceito das B-splines.
+      Cada ponto é gerado por meio de uma ponderação (pesos 'w' para
+      cada função de controle):
+        
+* RaGs (curvas gaussianas)
+        P(u,v) = ∑(i=1, N) Pi * g_i,σ
+
+            g_i,σ = 
+                    --------------------
+                    ∑(i=1, N) 
