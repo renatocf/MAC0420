@@ -1,0 +1,250 @@
+Animações
+==========
+
+* O que é uma animação?
+    - Modelar geometria = especificar o formato
+        - Uso de malhas, hierarquias, superfícies curvas, etc.
+    - Animações = especificar formas como uma função do tempo
+        - Modelagem feita por frame?
+            - Cenas mais simples ou com velocidade rápida podem ter
+              menos frames do que cenas mais complexas/lentas.
+        - Precisa ser suave, com movimentos suaves e coesos.
+
+* Técnicas de desenho de animação tradicional ("na mão")
+    - 'straight ahead': desenhar os frames na ordem (usando um
+      'lightbox' para ver o frame ou frams anteriores).
+        - Difícil de ter controle na mão (numa pose ou tempo
+          particular).
+    - 'key frame':
+        - Usada no lugar, para facilitar
+        - Os desenhos mais importantes são desenhados primeiro, e
+          então os entre eles ('in-betweens').
+
+    - Ambas podem ser feitas também com CG.
+
+* Keyframes em animação por computação
+    - Assim como com uma animação 'hand-draw', ajustamos de nício as 
+      deformações para cada frame, de modo complexo e difícil.
+
+    - Mesma solução: animado estabelece os 'keuframes', e o software faz
+      os 'in-betweens'.
+
+    - Duas grandes ideias da animação por computação
+        - Criar níveis altos de controle para ajustar a geometria
+
+* Soluções básicas de animação
+    - Transformações afim entre posições na modelagem
+    - Transformações adim para mover as cenas ao longo da animação
+
+    - A hierarquia de transformações ao longo do tempo é o centro do
+      trabalho da animação.
+        - Arcabouço básico dentro do qual as técnicas mais sofisticadas
+          são feitos.
+
+* Interpolação de transformações
+    - Mover um conjunto de pontos aplicando uma transformação afim
+    - Como naimar as transformações pelo tempo?
+        - Mais simples com translações - mas e rotações?
+        - Interpolar as matrizes de keyframe para keyframe?
+
+* Parametrização de rotações
+    - Podemos usar ângulos de Euler (interpolando as três matrizes de
+      rotação em x, y e z) e com eixos/ângulos (em que precisamos
+      interpolar ambos).
+    - A forma mais usada, porém, é aplicando Quatérnios.
+    - Ambas as modelidades podem ser usadas com 'straight ahead'
+      ou 'keyframes'.
+
+* Aproximações para animação
+    - Straight ahead
+        - Desenho/animação de um frame por vez.
+        - Pode levar a espontaneidade.
+    - Keyframes
+        - Frames chave para a história.
+        - Outras são geradas no meio do tempo.
+
+* Controlando a geometria
+    - Poderia animar movendo cada ponto de controle em cada keyframe.
+        - Seria um overkill
+    - Forma melhor animas usando pequenos conjutnso de grau de liberdade
+      (DOFs = Degrees Of Freedom) significativos
+        - Modelar DOFs é inapropriado para animações
+        - Ex: "Mover um milímetro do braço para a direita"
+    - Posicionam-se junções específicas ao longo de um esqueleto.
+
+* Rigged character
+    - Superfície é defirmada sobre um conjunto de ossos.
+    - Ossos são controlados por pontos de controle menores.
+    - Os controles são úteis - DOFs intuitivos para o animador.
+    - É possível ligar os esqueletos às superfícies.
+
+* 12 princípios da nimação
+    01. Timing
+        - Velocidade de uma ação é crucial para a impressão que ela
+          cria - a quantidade de frames pode mudar a emoção a animação.
+
+    02. Ease in/out (ou slow in/out)
+        - Objetos reais não começam e param bruscamente.
+            - Parâmetros de animação não deveriam fazer isso também
+            - Pouco vai muito longe
+
+    03. Formas em arco
+        - Objetos reais não se movem em linha reta
+        - Geralmente, curvas graciosas são mais realistas.
+
+    04. Antecipação
+        - A maioria das ações tem alguma finalização.
+
+    05. Exagero
+        - Animação nem sempre tem a ver com modelar a realidade.
+        - Exagerar é muito usado para dar ênfase.
+
+    06. Deforamação
+        - Objetos não são perfeitamente rígidos ao se mover.
+        - Adicionar esticamento por movimento e deformação por impacto.
+
+    07. Ações secundárias
+        - Ações secundárias criar interesse e realismo na animação.
+        - Ela deveria ser criada tal que ela pode ser percebida, mas não
+          se sobreponha à ação principaç;
+
+    08. Finalização e junção de ações consecutivas
+        - É o mesmo que antecipação, mas no final da ação.
+        - Ações soprepõem-se quando uma ação que ocorre por causa
+          de outra ação.
+
+    09. Estratégias de animação
+        - Straight ahead x Pose to Pose
+
+    10. Staging
+        - Para produzir ações limpas e bem vistas em imagens 2D.
+            - Deve ter bons ângulos de câmera, design de cena e posições
+              dos caracteres (ao ver apenas o semblante do objeto,
+              devemos conseguir ver suas ações).
+
+    11. Apelo
+        - "Apelo" significa que os personagens deve ter um charme,
+          desigh, um magnetismo.
+            - Está relacionado com poutros princícios, como exagero,
+              evitar simetria e usar ações sobrepostas com outras.
+
+        - É importante notar que "apelo" não necessariamente significa
+          "bom versus mal".
+
+    12. Personalidade
+        - Histórias precisam ser importantes, e o animador deve imprimir
+          PERSONALIDADE nos seus personagens (por meio de suas
+          movimentações).
+
+* Controlando formatos por animação
+    - Começa com controle dos DOFs (pontos de controle)
+    - Deformaçẽos controladas por esses DOFs em um nível superior.
+    - Criar controle de animações em um nível mais alto (abrir/fechar
+      mão esquerda, por exemplo).
+
+* Interpolando transformações
+    - Interplação linear de matrizes não é efetiva
+    - Uma aprooximação: sempre mantenha se transformações na forma
+      canõnica (ex: translação-rotação-escala).
+
+    - Um produto M = TRS não é difícil de conseguir
+        - Translações ficam no início.
+        - RS tem três colunas ortongonais.
+        - Fator de escara são o comprimento das colunas.
+
+    - Mas isso não cobre todos os casos:
+        - A partir de duas matrizes 4x4 completas da cena, não podemos
+          apenas interpolar de forma linear entre elas.
+        - Precisaoms decompor as matrizes em várias matrizes -
+          translação, rotação, escala e cisalhamento. Esse último é
+          MUITO DIFÍCIL de ser retirado.
+
+    - Em geral, usaremos matrizes para translação e escala, e Quatérnios
+      para as rotações.
+
+* Interpolando direções
+    - Interpolação no espaço 3D dos vetor é bem comportado.
+        - Computação simples: interpolação linear e normalização.
+    - Isso é o que fazemos todo o tempo. Por exemplo, com fragmentos
+      simples de coloração
+                v(t) = normalize((1-t)*v0 + t*v1)
+
+    - Para velocidades constantes: interpolação linear esférica (SLERP)
+
+* Interpolação linera esférica
+    - Interpolação intuitiva entre diferentes orientações
+        - representada bem pelos quatérnios
+        - Útil para animação
+        - Dados dois quatérnios, interpolar entre eles.
+    - Acha o menor caminho entre dois pontos na superfície
+      de uma esfera.
+
+* Hierarquias e figuras animadas
+    - Em mecânica, o relacionamento entre DOFs e a pose 3D é chamada de
+      cinemática.
+    - Robótica é uma fonte de métodos matemáticos
+        - Robôs são transformados em hierarquias
+        - Cinemática direta
+        - Cinemática inversa
+
+* Mesh skinning
+    - Uma forma simples de deformar superfícies para seguir um
+      esqueleto.
+
+    - É necessário estabelecer que parte de cada superfície está
+      atralada a cada região do esqueleto.
+    - Os pontos de controle são mapeados a segmentos do esqueleto.
+    - Cada junção tem movimentos associados a ela.
+
+    - Matemática
+        - Posições deformadas num certo ponto é uma soma com pesos.
+            - da posição determinada por cada osso na transformação.
+            - os pesos são colocados por pesos do vérfice em cada osso.
+        - Porém, podem ocorrer deformações.
+
+* Mistura de formas
+    - Precisamos fazer a interpolação de formas no espaço e no tempo.
+    - Fazer os movimentos, entretanto, não é simples.
+
+* Captura de movimento
+    - Criar os movimentos exatos é muito complicado.
+    - Para facilitar as capturas, usam-se tecnologias de captura de
+      movimentos mais simples.
+
+    - Técnicas de captura
+
+        - Magnética (caindo em desuso)
+            - Por corrente, detectada por aparelhos.
+            - Objetos de metal próximos podem atrapalhar.
+            - Frequência baixa (60Hz).
+
+        - Mecânica (caindo em desuso)
+            - Mede ângulos entre juntas diretamente (exoesqueleto
+              vestido pelo ator para capturas).
+            - Trabalha em qualquer ambiente
+            - Restringe movimento.
+
+        - Ótica
+            - Pequenas bolinhas (marcadores) colocadas no ator que
+              realiza o movimento.
+            - Várias câmeras capturam esses movimentos, usando
+              frequências diferentes.
+            - Volume de captura restrito.
+            - Frequência alta (240Hz).
+            - Oclusões (perda temporária de marcadores).
+
+            - Novas tecnilogias têm usado marcadores "ativos", para
+              diferenciar quais são os elementos.
+
+        - Contexto
+            - Mapeamento feito com base em vídeo
+            - Dados coletados são realistas
+                - Timing encontra a perfermance exatamente
+                - Dimensões são exatas
+            - Não é suficiente para boa animação de personagens
+                - Poucos DOFs
+                - Muitos erros e ruído nas marcações
+                - Só se aplica a caracteres com formato humano.
+
+        - Os dados de captura de movimento são um bom ponto de
+          partida para animadores criarem bons produtos finais.
